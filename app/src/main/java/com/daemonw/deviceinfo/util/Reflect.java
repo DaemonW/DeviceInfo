@@ -244,7 +244,11 @@ public class Reflect {
         return type;
     }
 
+<<<<<<< HEAD
     public static Object defaultValue(Class<?> _type){
+=======
+    public static Object defaultValue(Class<?> _type) {
+>>>>>>> first init
         Class<?> type = wrapper(_type);
         if (type == null) {
             return null;
@@ -298,10 +302,17 @@ public class Reflect {
      * @return object
      * @throws ReflectException
      */
+<<<<<<< HEAD
     public <T> T opt(String name){
         try {
             return field(name).get();
         }catch (Exception e){
+=======
+    public <T> T opt(String name) {
+        try {
+            return field(name).get();
+        } catch (Exception e) {
+>>>>>>> first init
             e.printStackTrace();
         }
         return null;
@@ -511,7 +522,11 @@ public class Reflect {
     public <P> P as(Class<P> proxyType) {
         final boolean isMap = (object instanceof Map);
         final InvocationHandler handler = new InvocationHandler() {
+<<<<<<< HEAD
             
+=======
+
+>>>>>>> first init
             public Object invoke(Object proxy, Method method, Object[] args) throws Throwable {
                 String name = method.getName();
                 try {
@@ -680,19 +695,31 @@ public class Reflect {
     public void printFields() {
         if (object == null)
             return;
+<<<<<<< HEAD
         Map<String,Reflect> fields = fields();
+=======
+        Map<String, Reflect> fields = fields();
+>>>>>>> first init
         if (fields == null)
             return;
 
         StringBuilder out = new StringBuilder();
+<<<<<<< HEAD
         for (Map.Entry<String,Reflect> entry:fields.entrySet()) {
+=======
+        for (Map.Entry<String, Reflect> entry : fields.entrySet()) {
+>>>>>>> first init
             String name = entry.getKey();
             Reflect reflect = entry.getValue();
             String value = reflect.object == null ? "null" : reflect.object.toString();
             out.append(name + " = " + value);
             out.append('\n');
         }
+<<<<<<< HEAD
         Log.e(isClass ? ((Class)object).getSimpleName() : object.getClass().getSimpleName(), out.toString());
+=======
+        Log.e(isClass ? ((Class) object).getSimpleName() : object.getClass().getSimpleName(), out.toString());
+>>>>>>> first init
     }
 
     private boolean matchObjectMethod(Method possiblyMatchingMethod, String desiredMethodName,
