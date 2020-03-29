@@ -244,11 +244,7 @@ public class Reflect {
         return type;
     }
 
-<<<<<<< HEAD
-    public static Object defaultValue(Class<?> _type){
-=======
     public static Object defaultValue(Class<?> _type) {
->>>>>>> first init
         Class<?> type = wrapper(_type);
         if (type == null) {
             return null;
