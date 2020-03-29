@@ -20,7 +20,7 @@ class NetworkInfoViewModel : ViewModel() {
         return this.info.value as NetworkInfo
     }
 
-    fun load() {
+    fun load(): NetworkInfoViewModel {
         val i = NetworkInfo()
         val dm = DeviceInfoManager.get()
         i.bssid = dm.wifiBSSID()
@@ -29,7 +29,7 @@ class NetworkInfoViewModel : ViewModel() {
         i.mac = dm.macAddress()
         i.vendor = dm.vendor()
         this.info.value = i
-
+        return this
     }
 }
 

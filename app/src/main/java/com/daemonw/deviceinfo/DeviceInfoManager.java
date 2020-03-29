@@ -1,13 +1,19 @@
 package com.daemonw.deviceinfo;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
 import android.provider.Settings;
+import android.telephony.CellInfo;
+import android.telephony.CellLocation;
+import android.telephony.NeighboringCellInfo;
 import android.telephony.TelephonyManager;
 
 import com.daemonw.deviceinfo.util.Reflect;
+
+import java.util.List;
 
 public class DeviceInfoManager {
     private Context context;
@@ -40,12 +46,22 @@ public class DeviceInfoManager {
 
     public String imei1() {
         //return manager.getImei(0);
-        return Reflect.on(tm).call("getImei", 0).get();
+        try {
+            return Reflect.on(tm).call("getImei", 0).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public String imei2() {
         //return manager.getImei(1);
-        return Reflect.on(tm).call("getImei", 1).get();
+        try {
+            return Reflect.on(tm).call("getImei", 1).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     public String imsi() {
@@ -135,5 +151,41 @@ public class DeviceInfoManager {
     public String macAddress() {
         WifiInfo wi = wm.getConnectionInfo();
         return wi == null ? "" : wi.getMacAddress();
+    }
+
+    public String networkOperator() {
+        return tm.getNetworkOperator();
+    }
+
+    public String simOperator() {
+        return tm.getSimOperator();
+    }
+
+    public String networkCountryIso() {
+        return tm.getNetworkCountryIso();
+    }
+
+    public String simCountryIso() {
+        return tm.getSimCountryIso();
+    }
+
+    public String simOperatorNumber() {
+        return tm.getSimOperator();
+    }
+
+    public List<CellInfo> getCellInfos() {
+        return tm.getAllCellInfo();
+    }
+
+    public CellLocation getCellLocation() {
+        return tm.getCellLocation();
+    }
+
+    @TargetApi(28)
+    public List<NeighboringCellInfo> getNeighboringCellInfos() {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            return tm.getNeighboringCellInfo();
+        }
+        return null;
     }
 }
