@@ -24,9 +24,18 @@ class DeviceInfoViewModel : ViewModel() {
         val i = DeviceInfo()
         val dm = DeviceInfoManager.get()
         i.androidId = dm.androidId()
-        i.imei=dm.imei1()
-        i.imei2=dm.imei2()
-        i.phoneNumber=dm.phoneNumber()
+        i.imei = dm.imei1()
+        i.imei2 = dm.imei2()
+        i.meid = dm.meid1()
+        i.meid2 = dm.meid2()
+        i.imsi = dm.imsi1()
+        i.imsi2 = dm.imsi2()
+        i.phoneNumber1 = dm.phoneNumber1()
+        i.phoneNumber2 = dm.phoneNumber2()
+        i.sim1Serial = dm.simSerial1()
+        i.sim2Serial = dm.simSerial2()
+        i.wifiMac = dm.wifiMac()
+        i.bluetoothMac = dm.bluetoothMac()
         this.info.value = i
         return this
     }

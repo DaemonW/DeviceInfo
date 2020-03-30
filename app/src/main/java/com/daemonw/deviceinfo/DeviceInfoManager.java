@@ -1,6 +1,7 @@
 package com.daemonw.deviceinfo;
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
@@ -19,12 +20,14 @@ public class DeviceInfoManager {
     private Context context;
     private TelephonyManager tm;
     private WifiManager wm;
+    private BluetoothManager bm;
     private static DeviceInfoManager dm;
 
     private DeviceInfoManager(Context context) {
         this.context = context;
         tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
+        bm = (BluetoothManager) context.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
     }
 
     public static void init(Context context) {
@@ -40,8 +43,8 @@ public class DeviceInfoManager {
     }
 
     public String imei() {
-        //return manager.getImei();
-        return Reflect.on(tm).call("getImei").get();
+        return tm.getImei();
+        //return Reflect.on(tm).call("getImei").get();
     }
 
     public String imei1() {
@@ -58,6 +61,32 @@ public class DeviceInfoManager {
         //return manager.getImei(1);
         try {
             return Reflect.on(tm).call("getImei", 1).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    public String meid() {
+        return tm.getMeid();
+        //return Reflect.on(tm).call("getMeid").get();
+    }
+
+    public String meid1() {
+        //return manager.getMeid(0);
+        try {
+            return Reflect.on(tm).call("getMeid", 0).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    public String meid2() {
+        //return manager.getMeid(0);
+        try {
+            return Reflect.on(tm).call("getMeid", 1).get();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -83,9 +112,48 @@ public class DeviceInfoManager {
     }
 
     //电话号码
-    public String phoneNumber() {
-        //return manager.getLine1Number();
-        return Reflect.on(tm).call("getLine1Number").get();
+    public String phoneNumber1() {
+//        return tm.getLine1Number();
+        try {
+            return Reflect.on(tm).call("getLine1Number", 0).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    //电话号码
+    public String phoneNumber2() {
+//        return tm.getLine1Number();
+        try {
+            return Reflect.on(tm).call("getLine1Number", 1).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+
+    //sim串号
+    public String simSerial1() {
+//        return tm.getSimSerialNumber();
+        try {
+            return Reflect.on(tm).call("getSimSerialNumber", 0).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    //sim串号
+    public String simSerial2() {
+//        return tm.getSimSerialNumber();
+        try {
+            return Reflect.on(tm).call("getSimSerialNumber", 1).get();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return "";
     }
 
     //厂商
@@ -148,9 +216,13 @@ public class DeviceInfoManager {
         return wi == null ? "" : String.valueOf(wi.getNetworkId());
     }
 
-    public String macAddress() {
+    public String wifiMac() {
         WifiInfo wi = wm.getConnectionInfo();
         return wi == null ? "" : wi.getMacAddress();
+    }
+
+    public String bluetoothMac() {
+        return android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
     }
 
     public String networkOperator() {

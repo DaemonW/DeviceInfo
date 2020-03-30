@@ -8,6 +8,8 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
+import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.RecyclerView
 import com.daemonw.deviceinfo.R
 
 class MainFragment : Fragment() {
@@ -15,24 +17,45 @@ class MainFragment : Fragment() {
     private var mNetworkViewModel: NetworkInfoViewModel? = null
     private var mCellularViewModel: CellularViewModel? = null
     private var mDeviceViewModel: DeviceInfoViewModel? = null
+    private var mNetworkInfoList: RecyclerView? = null
+    private var mCellularInfoList: RecyclerView? = null
+    private var mDeviceInfoList: RecyclerView? = null
+    private var mCellularAdater: InfoAdapter? = null
+    private var mDeviceAdater: InfoAdapter? = null
+    private var mNetworkAdater: InfoAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
-        return inflater.inflate(R.layout.main_fragment, container, false)
-    }
+        Log.e("daemonw", "onCreateView")
+        var root = inflater.inflate(R.layout.main_fragment, container, false)
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
+        mCellularInfoList = root.findViewById(R.id.cell_info)
+        mCellularAdater = InfoAdapter(context, null)
+        mCellularInfoList?.layoutManager = LinearLayoutManager(context)
+        mCellularInfoList?.adapter = mCellularAdater
+
+        mDeviceInfoList = root.findViewById(R.id.device_info)
+        mDeviceAdater = InfoAdapter(context, null)
+        mDeviceInfoList?.layoutManager = LinearLayoutManager(context)
+        mDeviceInfoList?.adapter = mDeviceAdater
+
+        mNetworkInfoList = root.findViewById(R.id.network_info)
+        mNetworkAdater = InfoAdapter(context, null)
+        mNetworkInfoList?.layoutManager = LinearLayoutManager(context)
+        mNetworkInfoList?.adapter = mNetworkAdater
+
         mNetworkViewModel = ViewModelProviders.of(this).get(NetworkInfoViewModel::class.java)
         // TODO: Use the ViewModel
         mNetworkViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
-            Log.e("daemonw", "mac = " + it.mac)
+            Log.e("daemonw", "network info:\n $it")
+            mNetworkAdater?.setData(it.toInfoList())
         })
 
         mCellularViewModel = ViewModelProviders.of(this).get(CellularViewModel::class.java)
         // TODO: Use the ViewModel
         mCellularViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
-            Log.e("daemonw", "net operator = " + it.networkOperator)
+            Log.e("daemonw", "cellular info:\n $it")
+            mCellularAdater?.setData(it.toInfoList())
         })
 
         mDeviceViewModel = ViewModelProviders.of(this).get(DeviceInfoViewModel::class.java)
@@ -40,8 +63,16 @@ class MainFragment : Fragment() {
         mDeviceViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
             Log.e("daemonw", "androidId = " + it.androidId)
             Log.e("daemonw", "imei = " + it.imei)
-            Log.e("daemonw", "phone number = " + it.phoneNumber)
+            Log.e("daemonw", "imei2 = " + it.imei2)
+            Log.e("daemonw", "phone number1 = " + it.phoneNumber1)
+            Log.e("daemonw", "phone number2 = " + it.phoneNumber2)
         })
+        return root;
+    }
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        super.onActivityCreated(savedInstanceState)
+        Log.e("daemonw", "onActivityCreated")
     }
 
     companion object {

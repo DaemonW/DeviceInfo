@@ -1,104 +1,133 @@
 package com.daemonw.deviceinfo.model;
 
-import android.os.Parcel;
-import android.os.Parcelable;
+import androidx.annotation.NonNull;
 
-import java.util.HashMap;
-import java.util.Map;
+public class DeviceInfo {
 
-public class DeviceInfo implements Parcelable {
-
-    public String imei;
-    public String imei2; // imei2
-    public String meid1; // imei2
-    public String meid2; // imei2
     public String androidId;
-    public String wifiMac;
-    public String bluetoothMac;
-    public String phoneNumber;
-
-    public String sim1Id;
-    public String sim2Id;
+    public String imei;
+    public String imei2;
+    public String imsi;
+    public String imsi2;
+    public String meid;
+    public String meid2;
+    public String phoneNumber1;
+    public String phoneNumber2;
     public String sim1Serial;
     public String sim2Serial;
-
-    public String iccId;
-    public String serial;
-    public String gmsAdId;
-
-    public final Map<String, String> buildProp = new HashMap<>();
+    public String wifiMac;
+    public String bluetoothMac;
 
     public DeviceInfo() {
     }
 
+    public String getImei() {
+        return imei;
+    }
+
+    public void setImei(String imei) {
+        this.imei = imei;
+    }
+
+    public String getImei2() {
+        return imei2;
+    }
+
+    public void setImei2(String imei2) {
+        this.imei2 = imei2;
+    }
+
+    public String getImsi() {
+        return imsi;
+    }
+
+    public void setImsi(String imsi) {
+        this.imsi = imsi;
+    }
+
+    public String getImsi2() {
+        return imsi2;
+    }
+
+    public void setImsi2(String imsi2) {
+        this.imsi2 = imsi2;
+    }
+
+    public String getMeid() {
+        return meid;
+    }
+
+    public void setMeid(String meid1) {
+        this.meid = meid1;
+    }
+
+    public String getMeid2() {
+        return meid2;
+    }
+
+    public void setMeid2(String meid2) {
+        this.meid2 = meid2;
+    }
+
+    public String getAndroidId() {
+        return androidId;
+    }
+
+    public void setAndroidId(String androidId) {
+        this.androidId = androidId;
+    }
+
+    public String getWifiMac() {
+        return wifiMac;
+    }
+
+    public void setWifiMac(String wifiMac) {
+        this.wifiMac = wifiMac;
+    }
+
+    public String getBluetoothMac() {
+        return bluetoothMac;
+    }
+
+    public void setBluetoothMac(String bluetoothMac) {
+        this.bluetoothMac = bluetoothMac;
+    }
+
+    public String getPhoneNumber1() {
+        return phoneNumber1;
+    }
+
+    public void setPhoneNumber1(String phoneNumber1) {
+        this.phoneNumber1 = phoneNumber1;
+    }
+
+    public String getPhoneNumber2() {
+        return phoneNumber2;
+    }
+
+    public void setPhoneNumber2(String phoneNumber2) {
+        this.phoneNumber2 = phoneNumber2;
+    }
+
+    public String getSim1Serial() {
+        return sim1Serial;
+    }
+
+    public void setSim1Serial(String sim1Serial) {
+        this.sim1Serial = sim1Serial;
+    }
+
+    public String getSim2Serial() {
+        return sim2Serial;
+    }
+
+    public void setSim2Serial(String sim2Serial) {
+        this.sim2Serial = sim2Serial;
+    }
+
+    @NonNull
     @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeString(this.imei);
-        dest.writeString(this.imei2);
-        dest.writeString(this.meid1);
-        dest.writeString(this.meid2);
-        dest.writeString(this.androidId);
-        dest.writeString(this.wifiMac);
-        dest.writeString(this.bluetoothMac);
-        dest.writeString(this.sim1Id);
-        dest.writeString(this.sim2Id);
-        dest.writeString(this.sim1Serial);
-        dest.writeString(this.sim2Serial);
-        dest.writeString(this.iccId);
-        dest.writeString(this.serial);
-        dest.writeString(this.gmsAdId);
-        dest.writeInt(this.buildProp.size());
-        for (Map.Entry<String, String> entry : this.buildProp.entrySet()) {
-            dest.writeString(entry.getKey());
-            dest.writeString(entry.getValue());
-        }
-    }
-
-    public DeviceInfo(Parcel in) {
-        this.imei = in.readString();
-        this.imei2 = in.readString();
-        this.meid1 = in.readString();
-        this.meid2 = in.readString();
-        this.androidId = in.readString();
-        this.wifiMac = in.readString();
-        this.bluetoothMac = in.readString();
-        this.sim1Id = in.readString();
-        this.sim2Id = in.readString();
-        this.sim1Serial = in.readString();
-        this.sim2Serial = in.readString();
-        this.iccId = in.readString();
-        this.serial = in.readString();
-        this.gmsAdId = in.readString();
-        int buildPropSize = in.readInt();
-        for (int i = 0; i < buildPropSize; i++) {
-            String key = in.readString();
-            String value = in.readString();
-            this.buildProp.put(key, value);
-        }
-    }
-
-    public static final Parcelable.Creator<DeviceInfo> CREATOR = new Parcelable.Creator<DeviceInfo>() {
-        @Override
-        public DeviceInfo createFromParcel(Parcel source) {
-            return new DeviceInfo(source);
-        }
-
-        @Override
-        public DeviceInfo[] newArray(int size) {
-            return new DeviceInfo[size];
-        }
-    };
-
-    public String getProp(String key) {
-        return buildProp.get(key);
-    }
-
-    public void setProp(String key, String value) {
-        buildProp.put(key, value);
+    public String toString() {
+        return super.toString();
     }
 }

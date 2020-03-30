@@ -1,7 +1,13 @@
 package com.daemonw.deviceinfo.model;
 
+import androidx.annotation.NonNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+
 public class NetworkInfo {
-     String ssid;
+    String ssid;
     private String bssid;
     private String networkId;
     private String mac;
@@ -45,6 +51,23 @@ public class NetworkInfo {
 
     public void setVendor(String vendor) {
         this.vendor = vendor;
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return String.format(Locale.getDefault(), "BSSID = %s,\nSSID = %s,\nnetworkId = %s,\nmac = %s,\nvendor = %s",
+                bssid, ssid, networkId, mac, vendor);
+    }
+
+    public List<ItemInfo> toInfoList() {
+        List<ItemInfo> infos = new ArrayList<>();
+        infos.add(new ItemInfo("BSSID", bssid));
+        infos.add(new ItemInfo("SSID", ssid));
+        infos.add(new ItemInfo("网络id", networkId));
+        infos.add(new ItemInfo("MAC地址", mac));
+        infos.add(new ItemInfo("制造商", vendor));
+        return infos;
     }
 }
 

@@ -1,5 +1,6 @@
 package com.daemonw.deviceinfo
 
+import android.Manifest
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import com.blankj.utilcode.constant.PermissionConstants
@@ -12,19 +13,17 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.main_activity)
-        if (savedInstanceState == null) {
-            supportFragmentManager.beginTransaction()
-                    .replace(R.id.container, MainFragment.newInstance())
-                    .commitNow()
-        }
         requestPermission()
     }
 
     fun requestPermission() {
-        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.LOCATION)
+        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.LOCATION, PermissionConstants.PHONE)
                 //.rationale { shouldRequest -> {} }
                 .callback(object : PermissionUtils.FullCallback {
                     override fun onGranted(permissionsGranted: List<String>) {
+                        supportFragmentManager.beginTransaction()
+                                .replace(R.id.container, MainFragment.newInstance())
+                                .commitNow()
                     }
 
                     override fun onDenied(permissionsDeniedForever: List<String>,

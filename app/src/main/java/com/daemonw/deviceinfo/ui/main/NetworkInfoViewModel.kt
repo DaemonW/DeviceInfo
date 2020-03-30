@@ -26,7 +26,7 @@ class NetworkInfoViewModel : ViewModel() {
         i.bssid = dm.wifiBSSID()
         i.ssid = dm.wifiSSID()
         i.networkId = dm.networkId()
-        i.mac = dm.macAddress()
+        i.mac = dm.wifiMac()
         i.vendor = dm.vendor()
         this.info.value = i
         return this
