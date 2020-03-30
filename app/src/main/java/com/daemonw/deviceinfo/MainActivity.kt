@@ -17,7 +17,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun requestPermission() {
-        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.LOCATION, PermissionConstants.PHONE)
+        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.LOCATION, PermissionConstants.PHONE,PermissionConstants.SENSORS)
                 //.rationale { shouldRequest -> {} }
                 .callback(object : PermissionUtils.FullCallback {
                     override fun onGranted(permissionsGranted: List<String>) {

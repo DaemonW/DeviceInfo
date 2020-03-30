@@ -25,10 +25,12 @@ class CellularViewModel : ViewModel() {
         val i = CellularInfo()
         val dm = DeviceInfoManager.get()
         i.networkOperator = dm.networkOperator()
+        i.networkOperatorName=dm.networkOperatorName()
         i.simOperator = dm.simOperator()
         i.networkCountryIso = dm.networkCountryIso()
         i.simCountryIso = dm.simCountryIso()
-        i.simOperatorNumber = dm.simOperatorNumber()
+        i.simOperatorName=dm.simOperatorName()
+        i.simState = dm.simState()
         this.info.value = i
         return this
     }

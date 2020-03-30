@@ -49,6 +49,7 @@ class MainFragment : Fragment() {
         mNetworkViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
             Log.e("daemonw", "network info:\n $it")
             mNetworkAdater?.setData(it.toInfoList())
+            mNetworkAdater?.notifyDataSetChanged()
         })
 
         mCellularViewModel = ViewModelProviders.of(this).get(CellularViewModel::class.java)
@@ -56,16 +57,14 @@ class MainFragment : Fragment() {
         mCellularViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
             Log.e("daemonw", "cellular info:\n $it")
             mCellularAdater?.setData(it.toInfoList())
+            mCellularAdater?.notifyDataSetChanged()
         })
 
         mDeviceViewModel = ViewModelProviders.of(this).get(DeviceInfoViewModel::class.java)
         // TODO: Use the ViewModel
         mDeviceViewModel?.load()?.get()?.observe(viewLifecycleOwner, Observer {
-            Log.e("daemonw", "androidId = " + it.androidId)
-            Log.e("daemonw", "imei = " + it.imei)
-            Log.e("daemonw", "imei2 = " + it.imei2)
-            Log.e("daemonw", "phone number1 = " + it.phoneNumber1)
-            Log.e("daemonw", "phone number2 = " + it.phoneNumber2)
+            mDeviceAdater?.setData(it.toInfoList())
+            mDeviceAdater?.notifyDataSetChanged()
         })
         return root;
     }

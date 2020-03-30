@@ -11,7 +11,7 @@ public class NetworkInfo {
     private String bssid;
     private String networkId;
     private String mac;
-    private String vendor;
+    private String manufacturer;
 
     public String getSSID() {
         return ssid;
@@ -46,18 +46,18 @@ public class NetworkInfo {
     }
 
     public String getVendor() {
-        return vendor;
+        return manufacturer;
     }
 
     public void setVendor(String vendor) {
-        this.vendor = vendor;
+        this.manufacturer = vendor;
     }
 
     @NonNull
     @Override
     public String toString() {
         return String.format(Locale.getDefault(), "BSSID = %s,\nSSID = %s,\nnetworkId = %s,\nmac = %s,\nvendor = %s",
-                bssid, ssid, networkId, mac, vendor);
+                bssid, ssid, networkId, mac, manufacturer);
     }
 
     public List<ItemInfo> toInfoList() {
@@ -66,7 +66,7 @@ public class NetworkInfo {
         infos.add(new ItemInfo("SSID", ssid));
         infos.add(new ItemInfo("网络id", networkId));
         infos.add(new ItemInfo("MAC地址", mac));
-        infos.add(new ItemInfo("制造商", vendor));
+        infos.add(new ItemInfo("制造商", manufacturer));
         return infos;
     }
 }

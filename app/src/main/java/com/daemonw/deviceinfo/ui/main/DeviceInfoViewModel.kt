@@ -23,6 +23,16 @@ class DeviceInfoViewModel : ViewModel() {
     fun load(): DeviceInfoViewModel {
         val i = DeviceInfo()
         val dm = DeviceInfoManager.get()
+        dm.getSimInfoBySubscriptionManager()
+        i.mafufacturer = dm.vendor()
+        i.brand = dm.brand()
+        i.model = dm.model()
+        i.osVersion = dm.osVersion()
+        i.bootloader = dm.bootloader()
+        i.buildId = dm.buildId()
+        i.fingerPrint = dm.fingerPrint()
+        i.buildTime = dm.buildTime()
+
         i.androidId = dm.androidId()
         i.imei = dm.imei1()
         i.imei2 = dm.imei2()
@@ -32,8 +42,8 @@ class DeviceInfoViewModel : ViewModel() {
         i.imsi2 = dm.imsi2()
         i.phoneNumber1 = dm.phoneNumber1()
         i.phoneNumber2 = dm.phoneNumber2()
-        i.sim1Serial = dm.simSerial1()
-        i.sim2Serial = dm.simSerial2()
+        i.iccId1 = dm.simSerial1()
+        i.iccId2 = dm.simSerial2()
         i.wifiMac = dm.wifiMac()
         i.bluetoothMac = dm.bluetoothMac()
         this.info.value = i

@@ -12,10 +12,12 @@ import java.util.Locale;
 
 public class CellularInfo {
     private String networkOperator;
+    private String networkOperatorName;
     private String simOperator;
+    private String simOperatorName;
     private String networkCountryIso;
     private String simCountryIso;
-    private String simOperatorNumber;
+    private String simState;
     private List<CellInfo> cellInfos;
     private CellLocation cellLocation;
     private List<NeighboringCellInfo> neighboringCellInfos;
@@ -52,12 +54,12 @@ public class CellularInfo {
         this.simCountryIso = simCountryIso;
     }
 
-    public String getSimOperatorNumber() {
-        return simOperatorNumber;
+    public String getSimState() {
+        return simState;
     }
 
-    public void setSimOperatorNumber(String simOperatorNumber) {
-        this.simOperatorNumber = simOperatorNumber;
+    public void setSimState(String simState) {
+        this.simState = simState;
     }
 
     public List<CellInfo> getCellInfos() {
@@ -84,22 +86,40 @@ public class CellularInfo {
         this.neighboringCellInfos = neighboringCellInfos;
     }
 
+    public String getNetworkOperatorName() {
+        return networkOperatorName;
+    }
+
+    public void setNetworkOperatorName(String networkOperatorName) {
+        this.networkOperatorName = networkOperatorName;
+    }
+
+    public String getSimOperatorName() {
+        return simOperatorName;
+    }
+
+    public void setSimOperatorName(String simOperatorName) {
+        this.simOperatorName = simOperatorName;
+    }
+
     @NonNull
     @Override
     public String toString() {
         return String.format(
                 Locale.getDefault(),
                 "networkOperator = %s,\nsimOperator = %s,\nnetworkCountryIso = %s,\nsimCountryIso = %s,\nsimOperatorNumber = %s",
-                networkOperator, simOperator, networkCountryIso, simCountryIso, simOperatorNumber);
+                networkOperator, simOperator, networkCountryIso, simCountryIso, simState);
     }
 
     public List<ItemInfo> toInfoList() {
         List<ItemInfo> infos = new ArrayList<>();
         infos.add(new ItemInfo("网络运行商", networkOperator));
+        infos.add(new ItemInfo("网络运行商名称", networkOperatorName));
         infos.add(new ItemInfo("运行商国家码", networkCountryIso));
         infos.add(new ItemInfo("SIM卡运行商", simOperator));
+        infos.add(new ItemInfo("SIM卡运行商名称", simOperatorName));
         infos.add(new ItemInfo("SIM卡国家码", simCountryIso));
-        infos.add(new ItemInfo("SIM卡运营商编号", simOperatorNumber));
+        infos.add(new ItemInfo("SIM卡状态", simState));
         return infos;
     }
 }

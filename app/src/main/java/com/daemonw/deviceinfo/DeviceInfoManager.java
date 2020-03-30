@@ -1,6 +1,7 @@
 package com.daemonw.deviceinfo;
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -10,10 +11,17 @@ import android.provider.Settings;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.SubscriptionInfo;
+import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
+
+import androidx.annotation.RequiresApi;
 
 import com.daemonw.deviceinfo.util.Reflect;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.List;
 
 public class DeviceInfoManager {
@@ -21,6 +29,7 @@ public class DeviceInfoManager {
     private TelephonyManager tm;
     private WifiManager wm;
     private BluetoothManager bm;
+    private SubscriptionManager sm;
     private static DeviceInfoManager dm;
 
     private DeviceInfoManager(Context context) {
@@ -28,6 +37,7 @@ public class DeviceInfoManager {
         tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         bm = (BluetoothManager) context.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
+        sm = (SubscriptionManager) SubscriptionManager.from(context);
     }
 
     public static void init(Context context) {
@@ -74,7 +84,7 @@ public class DeviceInfoManager {
     }
 
     public String meid1() {
-        //return manager.getMeid(0);
+//        return tm.getMeid();
         try {
             return Reflect.on(tm).call("getMeid", 0).get();
         } catch (Exception e) {
@@ -99,11 +109,29 @@ public class DeviceInfoManager {
     }
 
     public String imsi1() {
+        //return tm.getSubscriberId();
         return Reflect.on(tm).call("getSubscriberId", 0).get();
     }
 
     public String imsi2() {
-        return Reflect.on(tm).call("getSubscriberId", 1).get();
+        try {
+            return Reflect.on(tm).call("getSubscriberId", 1).get();
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        return "";
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    public void getSimInfoBySubscriptionManager() {
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        for (SubscriptionInfo info : list) {
+            Log.d("Q_M", "ICCID-->" + info.getIccId());
+            Log.d("Q_M", "subId-->" + info.getSubscriptionId());
+            Log.d("Q_M", "DisplayName-->" + info.getDisplayName());
+            Log.d("Q_M", "CarrierName-->" + info.getCarrierName());
+            Log.d("Q_M", "---------------------------------");
+        }
     }
 
     //品牌
@@ -170,6 +198,10 @@ public class DeviceInfoManager {
         return Build.VERSION.BASE_OS;
     }
 
+    public String buildTime() {
+        return String.valueOf(Build.TIME);
+    }
+
     //bootloader
     public String bootloader() {
         return Build.BOOTLOADER;
@@ -225,12 +257,44 @@ public class DeviceInfoManager {
         return android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
     }
 
+//    public String bluetoothMac() {
+//        try {
+//            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+//            Field field = bluetoothAdapter.getClass().getDeclaredField("mService");
+//            // 参数值为true，禁用访问控制检查
+//            field.setAccessible(true);
+//            Object bluetoothManagerService = field.get(bluetoothAdapter);
+//            if (bluetoothManagerService == null) {
+//                return null;
+//            }
+//            Method method = bluetoothManagerService.getClass().getMethod("getAddress");
+//            Object address = method.invoke(bluetoothManagerService);
+//            if (address != null && address instanceof String) {
+//                return (String) address;
+//            } else {
+//                return null;
+//            }
+//            //抛一个总异常省的一堆代码...
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//        return null;
+//    }
+
     public String networkOperator() {
         return tm.getNetworkOperator();
     }
 
+    public String networkOperatorName() {
+        return tm.getNetworkOperatorName();
+    }
+
     public String simOperator() {
         return tm.getSimOperator();
+    }
+
+    public String simOperatorName() {
+        return tm.getSimOperatorName();
     }
 
     public String networkCountryIso() {
@@ -241,8 +305,8 @@ public class DeviceInfoManager {
         return tm.getSimCountryIso();
     }
 
-    public String simOperatorNumber() {
-        return tm.getSimOperator();
+    public String simState() {
+        return String.valueOf(tm.getSimState());
     }
 
     public List<CellInfo> getCellInfos() {

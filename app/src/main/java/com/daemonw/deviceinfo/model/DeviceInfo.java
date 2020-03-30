@@ -2,7 +2,19 @@ package com.daemonw.deviceinfo.model;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DeviceInfo {
+    private String mafufacturer;
+    private String brand;
+    private String model;
+    private String osVersion;
+    private String bootloader;
+    private String buildId;
+    private String fingerPrint;
+    private String buildTime;
+
 
     public String androidId;
     public String imei;
@@ -13,8 +25,8 @@ public class DeviceInfo {
     public String meid2;
     public String phoneNumber1;
     public String phoneNumber2;
-    public String sim1Serial;
-    public String sim2Serial;
+    public String iccId1;
+    public String iccId2;
     public String wifiMac;
     public String bluetoothMac;
 
@@ -109,20 +121,84 @@ public class DeviceInfo {
         this.phoneNumber2 = phoneNumber2;
     }
 
-    public String getSim1Serial() {
-        return sim1Serial;
+    public String getIccId1() {
+        return iccId1;
     }
 
-    public void setSim1Serial(String sim1Serial) {
-        this.sim1Serial = sim1Serial;
+    public void setIccId1(String iccId1) {
+        this.iccId1 = iccId1;
     }
 
-    public String getSim2Serial() {
-        return sim2Serial;
+    public String getIccId2() {
+        return iccId2;
     }
 
-    public void setSim2Serial(String sim2Serial) {
-        this.sim2Serial = sim2Serial;
+    public void setIccId2(String iccId2) {
+        this.iccId2 = iccId2;
+    }
+
+    public String getMafufacturer() {
+        return mafufacturer;
+    }
+
+    public void setMafufacturer(String mafufacturer) {
+        this.mafufacturer = mafufacturer;
+    }
+
+    public String getBrand() {
+        return brand;
+    }
+
+    public void setBrand(String brand) {
+        this.brand = brand;
+    }
+
+    public String getModel() {
+        return model;
+    }
+
+    public void setModel(String model) {
+        this.model = model;
+    }
+
+    public String getOsVersion() {
+        return osVersion;
+    }
+
+    public void setOsVersion(String osVersion) {
+        this.osVersion = osVersion;
+    }
+
+    public String getBootloader() {
+        return bootloader;
+    }
+
+    public void setBootloader(String bootloader) {
+        this.bootloader = bootloader;
+    }
+
+    public String getBuildId() {
+        return buildId;
+    }
+
+    public void setBuildId(String buildId) {
+        this.buildId = buildId;
+    }
+
+    public String getFingerPrint() {
+        return fingerPrint;
+    }
+
+    public void setFingerPrint(String fingerPrint) {
+        this.fingerPrint = fingerPrint;
+    }
+
+    public String getBuildTime() {
+        return buildTime;
+    }
+
+    public void setBuildTime(String buildTime) {
+        this.buildTime = buildTime;
     }
 
     @NonNull
@@ -130,4 +206,33 @@ public class DeviceInfo {
     public String toString() {
         return super.toString();
     }
+
+
+    public List<ItemInfo> toInfoList() {
+        List<ItemInfo> infos = new ArrayList<>();
+        infos.add(new ItemInfo("制造商", mafufacturer));
+        infos.add(new ItemInfo("品牌", brand));
+        infos.add(new ItemInfo("型号", model));
+        infos.add(new ItemInfo("系统版本", osVersion));
+        infos.add(new ItemInfo("Bootloader", bootloader));
+        infos.add(new ItemInfo("Build Id", buildId));
+        infos.add(new ItemInfo("指纹", fingerPrint));
+        infos.add(new ItemInfo("编译时间", buildTime));
+
+        infos.add(new ItemInfo("Android Id", androidId));
+        infos.add(new ItemInfo("IMEI 1", imei));
+        infos.add(new ItemInfo("IMEI 2", imei2));
+        infos.add(new ItemInfo("MEID 1", meid));
+        infos.add(new ItemInfo("MEID 2", meid2));
+        infos.add(new ItemInfo("IMSI 1", imsi));
+        infos.add(new ItemInfo("IMSI 2", imsi2));
+        infos.add(new ItemInfo("电话号码 1", phoneNumber1));
+        infos.add(new ItemInfo("电话号码 2", phoneNumber2));
+        infos.add(new ItemInfo("ICCID 1", iccId1));
+        infos.add(new ItemInfo("ICCID 2", iccId2));
+        infos.add(new ItemInfo("WIFI MAC", wifiMac));
+        infos.add(new ItemInfo("蓝牙 MAC", bluetoothMac));
+        return infos;
+    }
+
 }
