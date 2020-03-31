@@ -23,7 +23,6 @@ class DeviceInfoViewModel : ViewModel() {
     fun load(): DeviceInfoViewModel {
         val i = DeviceInfo()
         val dm = DeviceInfoManager.get()
-        dm.getSimInfoBySubscriptionManager()
         i.mafufacturer = dm.vendor()
         i.brand = dm.brand()
         i.model = dm.model()

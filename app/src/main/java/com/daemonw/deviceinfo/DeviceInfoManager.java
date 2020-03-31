@@ -1,7 +1,6 @@
 package com.daemonw.deviceinfo;
 
 import android.annotation.TargetApi;
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -20,8 +19,6 @@ import androidx.annotation.RequiresApi;
 
 import com.daemonw.deviceinfo.util.Reflect;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.List;
 
 public class DeviceInfoManager {
@@ -116,7 +113,7 @@ public class DeviceInfoManager {
     public String imsi2() {
         try {
             return Reflect.on(tm).call("getSubscriberId", 1).get();
-        }catch (Exception e){
+        } catch (Exception e) {
             e.printStackTrace();
         }
         return "";
@@ -125,6 +122,9 @@ public class DeviceInfoManager {
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void getSimInfoBySubscriptionManager() {
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list == null) {
+            return;
+        }
         for (SubscriptionInfo info : list) {
             Log.d("Q_M", "ICCID-->" + info.getIccId());
             Log.d("Q_M", "subId-->" + info.getSubscriptionId());
