@@ -19,6 +19,9 @@ import androidx.annotation.RequiresApi;
 
 import com.daemonw.deviceinfo.util.Reflect;
 
+import java.net.NetworkInterface;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 
 public class DeviceInfoManager {
@@ -249,8 +252,40 @@ public class DeviceInfoManager {
     }
 
     public String wifiMac() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            return getWifiMacAddress();
+        }
         WifiInfo wi = wm.getConnectionInfo();
         return wi == null ? "" : wi.getMacAddress();
+    }
+
+    public static String getWifiMacAddress() {
+        try {
+            Enumeration<NetworkInterface> nis = NetworkInterface.getNetworkInterfaces();
+            if (nis == null) {
+                return "";
+            }
+            for (NetworkInterface t : Collections.list(nis)) {
+                if (t.getName().equalsIgnoreCase("wlan0")) {
+                    byte[] hardwareAddress = t.getHardwareAddress();
+                    if (hardwareAddress == null) {
+                        return "";
+                    }
+                    StringBuilder sb = new StringBuilder();
+                    int length = hardwareAddress.length;
+                    for (int i = 0; i < length; i++) {
+                        sb.append(String.format("%02X:", new Object[]{Byte.valueOf(hardwareAddress[i])}));
+                    }
+                    if (sb.length() > 0) {
+                        sb.deleteCharAt(sb.length() - 1);
+                    }
+                    return sb.toString();
+                }
+            }
+            return "";
+        } catch (Exception unused) {
+            return "";
+        }
     }
 
     public String bluetoothMac() {
