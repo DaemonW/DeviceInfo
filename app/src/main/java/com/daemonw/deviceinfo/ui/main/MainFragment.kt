@@ -2,14 +2,15 @@ package com.daemonw.deviceinfo.ui.main
 
 import android.os.Bundle
 import android.util.Log
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
+import android.view.*
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProviders
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import com.blankj.utilcode.util.FileIOUtils
+import com.blankj.utilcode.util.GsonUtils
 import com.daemonw.deviceinfo.R
 
 class MainFragment : Fragment() {
@@ -27,6 +28,7 @@ class MainFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         Log.e("daemonw", "onCreateView")
+        setHasOptionsMenu(true)
         var root = inflater.inflate(R.layout.main_fragment, container, false)
 
         mCellularInfoList = root.findViewById(R.id.cell_info)
@@ -72,6 +74,37 @@ class MainFragment : Fragment() {
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
         Log.e("daemonw", "onActivityCreated")
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu, inflater: MenuInflater) {
+        super.onCreateOptionsMenu(menu, inflater)
+        inflater.inflate(R.menu.menu_device_info, menu)
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        val id = item.itemId
+        when (id) {
+            R.id.export -> {
+                exportDeviceInfo()
+                return true
+            }
+        }
+        return super.onOptionsItemSelected(item)
+    }
+
+    fun exportDeviceInfo() {
+        val info = HashMap<String, Any?>()
+        info.put("device_info", mDeviceViewModel?.load()?.getDeviceInfo())
+        info.put("cell_info", mCellularViewModel?.load()?.getCellularInfo())
+        info.put("network_info", mNetworkViewModel?.load()?.getNetworkInfo())
+        val content = GsonUtils.toJson(info)
+        val dir = context?.getExternalFilesDir("info")
+        val success = FileIOUtils.writeFileFromString(dir?.absolutePath + "/device_info", content)
+        if(success){
+            Toast.makeText(context, "导出成功", Toast.LENGTH_SHORT).show()
+        }else{
+            Toast.makeText(context, "导出失败", Toast.LENGTH_SHORT).show()
+        }
     }
 
     companion object {
