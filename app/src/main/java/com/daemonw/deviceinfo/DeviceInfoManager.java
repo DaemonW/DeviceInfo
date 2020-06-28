@@ -1,6 +1,7 @@
 package com.daemonw.deviceinfo;
 
 import android.annotation.TargetApi;
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.net.wifi.WifiInfo;
@@ -19,6 +20,8 @@ import androidx.annotation.RequiresApi;
 
 import com.daemonw.deviceinfo.util.Reflect;
 
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.NetworkInterface;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -358,32 +361,36 @@ public class DeviceInfoManager {
     }
 
     public String bluetoothMac() {
-        return android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
+        String mac = getBtMac();
+        if (mac.isEmpty()) {
+            mac = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
+        }
+        return mac;
     }
 
-//    public String bluetoothMac() {
-//        try {
-//            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-//            Field field = bluetoothAdapter.getClass().getDeclaredField("mService");
-//            // 参数值为true，禁用访问控制检查
-//            field.setAccessible(true);
-//            Object bluetoothManagerService = field.get(bluetoothAdapter);
-//            if (bluetoothManagerService == null) {
-//                return null;
-//            }
-//            Method method = bluetoothManagerService.getClass().getMethod("getAddress");
-//            Object address = method.invoke(bluetoothManagerService);
-//            if (address != null && address instanceof String) {
-//                return (String) address;
-//            } else {
-//                return null;
-//            }
-//            //抛一个总异常省的一堆代码...
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//        }
-//        return null;
-//    }
+    public String getBtMac() {
+        try {
+            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+            Field field = bluetoothAdapter.getClass().getDeclaredField("mService");
+            // 参数值为true，禁用访问控制检查
+            field.setAccessible(true);
+            Object bluetoothManagerService = field.get(bluetoothAdapter);
+            if (bluetoothManagerService == null) {
+                return null;
+            }
+            Method method = bluetoothManagerService.getClass().getMethod("getAddress");
+            Object address = method.invoke(bluetoothManagerService);
+            if (address != null && address instanceof String) {
+                return (String) address;
+            } else {
+                return null;
+            }
+            //抛一个总异常省的一堆代码...
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 
     public String networkOperator() {
         return tm.getNetworkOperator();

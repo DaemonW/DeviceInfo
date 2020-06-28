@@ -33,7 +33,6 @@ class DeviceInfoViewModel : ViewModel() {
         i.hardware = dm.hardware()
         i.fingerPrint = dm.fingerPrint()
         i.buildTime = dm.buildTime()
-        dm.getSimInfoBySubscriptionManager()
         i.androidId = dm.androidId()
         i.imei = dm.imei(0)
         i.imei2 = dm.imei(1)

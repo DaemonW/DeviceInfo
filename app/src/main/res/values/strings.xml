@@ -1,3 +1,11 @@
 <resources>
     <string name="app_name">DeviceInfo</string>
+    <string name="export_device">Export Device Info</string>
+    <string name="export_sys_prop">Export System Properties</string>
+    <string name="view_sys_prop">View System Properties</string>
+    <string name="tip_export_device_success">export device info successfully</string>
+    <string name="tip_export_device_failed">export device info failed</string>
+
+    <string name="tip_export_prop_success">export build prop successfully</string>
+    <string name="tip_export_prop_failed">export build prop failed</string>
 </resources>

@@ -1,7 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:id="@+id/export"
-        android:title="导出" />
+        android:id="@+id/export_device"
+        android:title="@string/export_device" />
+
+    <item
+        android:id="@+id/export_sys_prop"
+        android:title="@string/export_sys_prop" />
+
+<!--    <item-->
+<!--        android:id="@+id/view_sys_prop"-->
+<!--        android:title="@string/view_sys_prop" />-->
 
 </menu>

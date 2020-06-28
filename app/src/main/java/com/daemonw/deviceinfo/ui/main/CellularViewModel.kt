@@ -4,7 +4,6 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.daemonw.deviceinfo.DeviceInfoManager
 import com.daemonw.deviceinfo.model.CellularInfo
-import com.daemonw.deviceinfo.model.NetworkInfo
 
 class CellularViewModel : ViewModel() {
     private val info: MutableLiveData<CellularInfo> = MutableLiveData()

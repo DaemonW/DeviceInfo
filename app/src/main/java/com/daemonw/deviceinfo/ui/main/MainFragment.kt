@@ -11,7 +11,13 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.blankj.utilcode.util.FileIOUtils
 import com.blankj.utilcode.util.GsonUtils
+import com.blankj.utilcode.util.ShellUtils
 import com.daemonw.deviceinfo.R
+import java.io.File
+import java.io.FileWriter
+import java.io.StringReader
+import java.util.*
+import kotlin.collections.HashMap
 
 class MainFragment : Fragment() {
 
@@ -84,15 +90,19 @@ class MainFragment : Fragment() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         val id = item.itemId
         when (id) {
-            R.id.export -> {
+            R.id.export_device -> {
                 exportDeviceInfo()
                 return true
+            }
+
+            R.id.export_sys_prop -> {
+                exportBuildProp()
             }
         }
         return super.onOptionsItemSelected(item)
     }
 
-    fun exportDeviceInfo() {
+    private fun exportDeviceInfo() {
         val info = HashMap<String, Any?>()
         info.put("device_info", mDeviceViewModel?.load()?.getDeviceInfo())
         info.put("cell_info", mCellularViewModel?.load()?.getCellularInfo())
@@ -100,11 +110,44 @@ class MainFragment : Fragment() {
         val content = GsonUtils.toJson(info)
         val dir = context?.getExternalFilesDir("info")
         val success = FileIOUtils.writeFileFromString(dir?.absolutePath + "/device_info", content)
-        if(success){
-            Toast.makeText(context, "导出成功", Toast.LENGTH_SHORT).show()
-        }else{
-            Toast.makeText(context, "导出失败", Toast.LENGTH_SHORT).show()
+        if (success) {
+            Toast.makeText(context, R.string.tip_export_device_success, Toast.LENGTH_SHORT).show()
+        } else {
+            Toast.makeText(context, R.string.tip_export_device_failed, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    private fun exportBuildProp() {
+        val result = ShellUtils.execCmd(arrayListOf("adb shell", "getprop"), false)
+        if (result.result != 0) {
+            return
+        }
+        val propStr = result.successMsg
+        val properties = Properties()
+        val fis = StringReader(propStr)
+        try {
+            properties.load(fis)
+            fis.close()
+            val itor = properties.entries.iterator()
+            val dir = context?.getExternalFilesDir("info")
+            val fos = FileWriter(File(dir, "build.prop.csv"))
+            fos.write("key,value\n")
+            while (itor.hasNext()) {
+                val item = itor.next()
+                val key = trim(item.key as String)
+                val value = trim(item.value as String)
+                fos.write("$key,$value\n")
+            }
+            fos.flush()
+            fos.close()
+            Toast.makeText(context, R.string.tip_export_prop_success, Toast.LENGTH_SHORT).show()
+        } catch (e: Exception) {
+            Toast.makeText(context, R.string.tip_export_prop_failed, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun trim(str: String): String {
+        return str.substring(1, str.length - 1)
     }
 
     companion object {
