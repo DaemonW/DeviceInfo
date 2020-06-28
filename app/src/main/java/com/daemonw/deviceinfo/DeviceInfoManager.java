@@ -37,7 +37,8 @@ public class DeviceInfoManager {
         tm = (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
         wm = (WifiManager) context.getApplicationContext().getSystemService(Context.WIFI_SERVICE);
         bm = (BluetoothManager) context.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
-        sm = (SubscriptionManager) SubscriptionManager.from(context);
+        //sm = (SubscriptionManager) SubscriptionManager.from(context);
+        sm = (SubscriptionManager) context.getApplicationContext().getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
     }
 
     public static void init(Context context) {
@@ -52,9 +53,18 @@ public class DeviceInfoManager {
         return Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
-    public String imei() {
-        return tm.getImei();
-        //return Reflect.on(tm).call("getImei").get();
+    public String imei(int slotIndex) {
+        String imei = "";
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                imei = tm.getImei(slotIndex);
+            } else {
+                imei = tm.getDeviceId();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return imei;
     }
 
     public String imei1() {
@@ -78,9 +88,18 @@ public class DeviceInfoManager {
     }
 
 
-    public String meid() {
-        return tm.getMeid();
-        //return Reflect.on(tm).call("getMeid").get();
+    public String meid(int slotIndex) {
+        String meid = "";
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                meid = tm.getMeid(slotIndex);
+            } else {
+                meid = tm.getDeviceId();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return meid;
     }
 
     public String meid1() {
@@ -103,23 +122,43 @@ public class DeviceInfoManager {
         return "";
     }
 
-    public String imsi() {
-        //return manager.getSubscriberId();
-        return Reflect.on(tm).call("getSubscriberId").get();
+    public String imsi(int slotIndex) {
+        //return tm.getSubscriberId();
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list != null) {
+            for (SubscriptionInfo info : list) {
+                if (info.getSimSlotIndex() == slotIndex) {
+                    return Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                }
+            }
+        }
+        return Reflect.on(tm).call("getSubscriberId", slotIndex).get();
     }
 
     public String imsi1() {
         //return tm.getSubscriberId();
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list != null) {
+            for (SubscriptionInfo info : list) {
+                if (info.getSimSlotIndex() == 0) {
+                    return Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                }
+            }
+        }
         return Reflect.on(tm).call("getSubscriberId", 0).get();
     }
 
     public String imsi2() {
-        try {
-            return Reflect.on(tm).call("getSubscriberId", 1).get();
-        } catch (Exception e) {
-            e.printStackTrace();
+        //return tm.getSubscriberId();
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list != null) {
+            for (SubscriptionInfo info : list) {
+                if (info.getSimSlotIndex() == 1) {
+                    return Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                }
+            }
         }
-        return "";
+        return Reflect.on(tm).call("getSubscriberId", 1).get();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -131,6 +170,8 @@ public class DeviceInfoManager {
         for (SubscriptionInfo info : list) {
             Log.d("Q_M", "ICCID-->" + info.getIccId());
             Log.d("Q_M", "subId-->" + info.getSubscriptionId());
+            Log.d("Q_M", "SlotIndex-->" + info.getSimSlotIndex());
+            Log.d("Q_M", "Number-->" + info.getNumber());
             Log.d("Q_M", "DisplayName-->" + info.getDisplayName());
             Log.d("Q_M", "CarrierName-->" + info.getCarrierName());
             Log.d("Q_M", "---------------------------------");
@@ -140,6 +181,20 @@ public class DeviceInfoManager {
     //品牌
     public String brand() {
         return Build.BRAND;
+    }
+
+    public String phoneNumber(int slotIndex) {
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list != null) {
+            for (SubscriptionInfo info : list) {
+                if (info.getSimSlotIndex() == slotIndex) {
+                    String number = Reflect.on(tm).call("getLine1Number", info.getSubscriptionId()).get();
+                    Log.e("daemonw", String.format("card%d number is: %s", slotIndex, number));
+                    return number;
+                }
+            }
+        }
+        return Reflect.on(tm).call("getLine1Number", slotIndex).get();
     }
 
     //电话号码
@@ -160,6 +215,20 @@ public class DeviceInfoManager {
             return Reflect.on(tm).call("getLine1Number", 1).get();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+        return "";
+    }
+
+    //ICCID
+    public String iccID(int slotIndex) {
+        List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
+        if (list != null) {
+            for (SubscriptionInfo info : list) {
+                if (info.getSimSlotIndex() == slotIndex) {
+                    String number = info.getIccId();
+                    return number;
+                }
+            }
         }
         return "";
     }
