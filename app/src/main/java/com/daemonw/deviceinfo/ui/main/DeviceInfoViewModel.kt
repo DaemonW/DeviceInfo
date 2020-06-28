@@ -28,7 +28,9 @@ class DeviceInfoViewModel : ViewModel() {
         i.model = dm.model()
         i.osVersion = dm.osVersion()
         i.bootloader = dm.bootloader()
+        i.boarder = dm.board()
         i.buildId = dm.buildId()
+        i.hardware = dm.hardware()
         i.fingerPrint = dm.fingerPrint()
         i.buildTime = dm.buildTime()
 
