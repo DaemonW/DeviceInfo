@@ -67,7 +67,7 @@ public class DeviceInfoManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return imei;
+        return imei == null ? "" : imei;
     }
 
     public String imei1() {
@@ -102,7 +102,7 @@ public class DeviceInfoManager {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return meid;
+        return meid == null ? "" : meid;
     }
 
     public String meid1() {
@@ -127,15 +127,24 @@ public class DeviceInfoManager {
 
     public String imsi(int slotIndex) {
         //return tm.getSubscriberId();
+        String imsi = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
         if (list != null) {
             for (SubscriptionInfo info : list) {
                 if (info.getSimSlotIndex() == slotIndex) {
-                    return Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                    try {
+                        imsi = Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 }
             }
         }
-        return Reflect.on(tm).call("getSubscriberId", slotIndex).get();
+        if (imsi == null || imsi.isEmpty()) {
+            imsi = Reflect.on(tm).call("getSubscriberId", slotIndex).get();
+        }
+        return imsi == null ? "" : imsi;
     }
 
     public String imsi1() {
@@ -187,17 +196,24 @@ public class DeviceInfoManager {
     }
 
     public String phoneNumber(int slotIndex) {
+        String number = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
         if (list != null) {
             for (SubscriptionInfo info : list) {
                 if (info.getSimSlotIndex() == slotIndex) {
-                    String number = Reflect.on(tm).call("getLine1Number", info.getSubscriptionId()).get();
-                    Log.e("daemonw", String.format("card%d number is: %s", slotIndex, number));
-                    return number;
+                    try {
+                        number = Reflect.on(tm).call("getLine1Number", info.getSubscriptionId()).get();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    break;
                 }
             }
         }
-        return Reflect.on(tm).call("getLine1Number", slotIndex).get();
+        if (number == null || number.isEmpty()) {
+            number = Reflect.on(tm).call("getLine1Number", slotIndex).get();
+        }
+        return number == null ? "" : number;
     }
 
     //电话号码
@@ -224,16 +240,24 @@ public class DeviceInfoManager {
 
     //ICCID
     public String iccID(int slotIndex) {
+        String iccId = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
         if (list != null) {
             for (SubscriptionInfo info : list) {
                 if (info.getSimSlotIndex() == slotIndex) {
-                    String number = info.getIccId();
-                    return number;
+                    iccId = info.getIccId();
+                    break;
                 }
             }
         }
-        return "";
+        if (iccId == null || iccId.isEmpty()) {
+            try {
+                iccId = Reflect.on(tm).call("getSimSerialNumber", 0).get();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return iccId == null ? "" : iccId;
     }
 
 
@@ -269,6 +293,11 @@ public class DeviceInfoManager {
         return Build.MODEL;
     }
 
+    //显示
+    public String display() {
+        return Build.DISPLAY;
+    }
+
     public String baseOS() {
         return Build.VERSION.BASE_OS;
     }
@@ -299,6 +328,16 @@ public class DeviceInfoManager {
     //主板
     public String board() {
         return Build.BOARD;
+    }
+
+    //产品
+    public String product() {
+        return Build.PRODUCT;
+    }
+
+    //机型
+    public String device() {
+        return Build.DEVICE;
     }
 
     //硬件
@@ -362,7 +401,7 @@ public class DeviceInfoManager {
 
     public String bluetoothMac() {
         String mac = getBtMac();
-        if (mac.isEmpty()) {
+        if (mac==null || mac.isEmpty()) {
             mac = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
         }
         return mac;

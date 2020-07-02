@@ -1,5 +1,6 @@
 package com.daemonw.deviceinfo.ui.main
 
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.*
@@ -109,7 +110,8 @@ class MainFragment : Fragment() {
         info.put("network_info", mNetworkViewModel?.load()?.getNetworkInfo())
         val content = GsonUtils.toJson(info)
         val dir = context?.getExternalFilesDir("info")
-        val success = FileIOUtils.writeFileFromString(dir?.absolutePath + "/device_info", content)
+        val fname = Build.BRAND + "_" + Build.MODEL
+        val success = FileIOUtils.writeFileFromString(dir?.absolutePath + "/" + fname, content)
         if (success) {
             Toast.makeText(context, R.string.tip_export_device_success, Toast.LENGTH_SHORT).show()
         } else {
