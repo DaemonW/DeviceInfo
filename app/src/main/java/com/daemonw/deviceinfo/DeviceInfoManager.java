@@ -385,7 +385,7 @@ public class DeviceInfoManager {
                     StringBuilder sb = new StringBuilder();
                     int length = hardwareAddress.length;
                     for (int i = 0; i < length; i++) {
-                        sb.append(String.format("%02X:", new Object[]{Byte.valueOf(hardwareAddress[i])}));
+                        sb.append(String.format("%02X:", hardwareAddress[i]));
                     }
                     if (sb.length() > 0) {
                         sb.deleteCharAt(sb.length() - 1);
@@ -401,7 +401,7 @@ public class DeviceInfoManager {
 
     public String bluetoothMac() {
         String mac = getBtMac();
-        if (mac==null || mac.isEmpty()) {
+        if (mac == null || mac.isEmpty()) {
             mac = android.provider.Settings.Secure.getString(context.getContentResolver(), "bluetooth_address");
         }
         return mac;
@@ -467,11 +467,10 @@ public class DeviceInfoManager {
         return tm.getCellLocation();
     }
 
-    @TargetApi(28)
     public List<NeighboringCellInfo> getNeighboringCellInfos() {
-        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            return tm.getNeighboringCellInfo();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return null;
         }
-        return null;
+        return Reflect.on(tm).call("getNeighboringCellInfo").get();
     }
 }

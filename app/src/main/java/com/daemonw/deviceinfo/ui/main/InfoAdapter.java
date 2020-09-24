@@ -29,6 +29,7 @@ public class InfoAdapter extends RecyclerView.Adapter {
 
     public void setData(List<ItemInfo> data) {
         if (data != null) {
+            this.infoList.clear();
             this.infoList.addAll(data);
         }
     }

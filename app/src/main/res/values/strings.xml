@@ -3,6 +3,7 @@
     <string name="export_device">Export Device Info</string>
     <string name="export_sys_prop">Export System Properties</string>
     <string name="view_sys_prop">View System Properties</string>
+    <string name="open_location_service">Open Location Service</string>
     <string name="tip_export_device_success">export device info successfully</string>
     <string name="tip_export_device_failed">export device info failed</string>
 
