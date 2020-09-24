@@ -1,12 +1,9 @@
 package com.daemonw.deviceinfo.ui.main;
 
-import androidx.lifecycle.MutableLiveData;
-
 import com.daemonw.deviceinfo.DeviceInfoManager;
 import com.daemonw.deviceinfo.model.DeviceInfo;
 
 public class DeviceInfoViewModel extends BaseViewModel<DeviceInfo> {
-    private MutableLiveData<DeviceInfo> info = new MutableLiveData<DeviceInfo>();
 
     public DeviceInfoViewModel load() {
         DeviceInfo i = new DeviceInfo();

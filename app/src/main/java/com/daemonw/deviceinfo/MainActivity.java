@@ -1,28 +1,36 @@
 package com.daemonw.deviceinfo;
 
+import android.Manifest;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.pm.PackageManager;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
-import com.blankj.utilcode.constant.PermissionConstants;
 import com.blankj.utilcode.util.FileIOUtils;
 import com.blankj.utilcode.util.GsonUtils;
-import com.blankj.utilcode.util.PermissionUtils;
 import com.blankj.utilcode.util.ShellUtils;
+import com.daemonw.deviceinfo.model.NetworkInfo;
 import com.daemonw.deviceinfo.ui.main.CellularViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
@@ -34,12 +42,19 @@ import java.io.FileWriter;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
 
 public class MainActivity extends AppCompatActivity {
+    private static final String[] REQUEST_PERM = new String[]{
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_STATE,
+            Manifest.permission.ACCESS_WIFI_STATE,
+            Manifest.permission.BODY_SENSORS};
+    private static final int REQUEST_PERM_CODE = 1101;
+
     private static final String[] PAGE = new String[]{"Hardware", "Cellular", "Network"};
     private TabLayout mTab;
     private ViewPager mPager;
@@ -48,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
     private NetworkInfoViewModel mNetworkViewModel;
     private CellularViewModel mCellularViewModel;
     private DeviceInfoViewModel mDeviceViewModel;
+    private BroadcastReceiver mReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -79,12 +95,23 @@ public class MainActivity extends AppCompatActivity {
         });
         mTab.getTabAt(0).select();
         mToolbar.setTitle(PAGE[0]);
-        requestPermission();
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+        mReceiver = new Receiver();
+        registerReceiver(mReceiver, filter);
+        if (isPermissionGranted()) {
+            mDeviceViewModel.load();
+            mNetworkViewModel.load();
+            mCellularViewModel.load();
+        } else {
+            ActivityCompat.requestPermissions(this, REQUEST_PERM, REQUEST_PERM_CODE);
+        }
     }
 
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onDestroy() {
+        unregisterReceiver(mReceiver);
+        super.onDestroy();
     }
 
     @Override
@@ -110,25 +137,41 @@ public class MainActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private void requestPermission() {
-        PermissionUtils.permission(PermissionConstants.STORAGE, PermissionConstants.LOCATION, PermissionConstants.PHONE, PermissionConstants.SENSORS)
-                //.rationale { shouldRequest -> {} }
-                .callback(new PermissionUtils.FullCallback() {
-                    @Override
-                    public void onGranted(List<String> permissionsGranted) {
-//                        getSupportFragmentManager().beginTransaction()
-//                                .replace(R.id.container, MainFragment.newInstance())
-//                                .commitNow();
-                        mDeviceViewModel.load();
-                        mNetworkViewModel.load();
-                        mCellularViewModel.load();
-                    }
+    private boolean isPermissionGranted() {
+        for (String perm : REQUEST_PERM) {
+            if (ContextCompat.checkSelfPermission(this, perm) != PackageManager.PERMISSION_GRANTED) {
+                return false;
+            }
+        }
+        return true;
+    }
 
-                    @Override
-                    public void onDenied(List<String> permissionsDeniedForever, List<String> permissionsDenied) {
-                        finish();
-                    }
-                }).request();
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERM_CODE) {
+            if (isPermissionGranted()) {
+                mDeviceViewModel.load();
+                mNetworkViewModel.load();
+                mCellularViewModel.load();
+            } else {
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Tip")
+                        .setMessage("you need to reserve som permissions to collect device information!")
+                        .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                ActivityCompat.requestPermissions(MainActivity.this, REQUEST_PERM, REQUEST_PERM_CODE);
+                            }
+                        }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                finish();
+                            }
+                        }).create();
+                dialog.show();
+            }
+        }
     }
 
     class InfoViewPager extends FragmentPagerAdapter {
@@ -163,6 +206,22 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             return PAGE[position];
+        }
+    }
+
+    class Receiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            if (action == null) {
+                return;
+            }
+            if (action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
+                NetworkInfo ni = mNetworkViewModel.getValue();
+                ni.setSSID(DeviceInfoManager.get().wifiSSID());
+                mNetworkViewModel.setValue(ni);
+            }
         }
     }
 
