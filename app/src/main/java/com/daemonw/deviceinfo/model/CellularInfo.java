@@ -10,7 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class CellularInfo {
+public class CellularInfo implements ListInfo{
     private String networkOperator;
     private String networkOperatorName;
     private String simOperator;
@@ -111,7 +111,7 @@ public class CellularInfo {
                 networkOperator, simOperator, networkCountryIso, simCountryIso, simState);
     }
 
-    public List<ItemInfo> toInfoList() {
+    public List<ItemInfo> toList() {
         List<ItemInfo> infos = new ArrayList<>();
         infos.add(new ItemInfo("网络运行商", networkOperator));
         infos.add(new ItemInfo("网络运行商名称", networkOperatorName));

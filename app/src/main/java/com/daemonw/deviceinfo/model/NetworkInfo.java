@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class NetworkInfo {
+public class NetworkInfo implements ListInfo{
     String ssid;
     private String bssid;
     private String networkId;
@@ -60,7 +60,7 @@ public class NetworkInfo {
                 bssid, ssid, networkId, mac, manufacturer);
     }
 
-    public List<ItemInfo> toInfoList() {
+    public List<ItemInfo> toList() {
         List<ItemInfo> infos = new ArrayList<>();
         infos.add(new ItemInfo("BSSID", bssid));
         infos.add(new ItemInfo("SSID", ssid));

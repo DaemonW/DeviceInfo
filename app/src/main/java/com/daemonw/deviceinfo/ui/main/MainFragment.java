@@ -17,11 +17,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
 
-import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.lifecycle.ViewModelProviders;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -79,7 +76,7 @@ public class MainFragment extends Fragment {
         // TODO: Use the ViewModel
         mNetworkViewModel.load().get().observe(getViewLifecycleOwner(), (it) -> {
             Log.e("daemonw", "network info:\n $it");
-            mNetworkAdater.setData(it.toInfoList());
+            mNetworkAdater.setData(it.toList());
             mNetworkAdater.notifyDataSetChanged();
         });
 
@@ -87,14 +84,14 @@ public class MainFragment extends Fragment {
         // TODO: Use the ViewModel
         mCellularViewModel.load().get().observe(getViewLifecycleOwner(), (it) -> {
             Log.e("daemonw", "cellular info:\n $it");
-            mCellularAdater.setData(it.toInfoList());
+            mCellularAdater.setData(it.toList());
             mCellularAdater.notifyDataSetChanged();
         });
 
         mDeviceViewModel = new ViewModelProvider(this).get(DeviceInfoViewModel.class);
         // TODO: Use the ViewModel
         mDeviceViewModel.load().get().observe(getViewLifecycleOwner(), (it) -> {
-            mDeviceAdater.setData(it.toInfoList());
+            mDeviceAdater.setData(it.toList());
             mDeviceAdater.notifyDataSetChanged();
         });
         IntentFilter filter = new IntentFilter();

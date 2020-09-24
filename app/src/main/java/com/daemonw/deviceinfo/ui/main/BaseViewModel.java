@@ -19,5 +19,5 @@ public abstract class BaseViewModel<T> extends ViewModel {
         return this.info.getValue();
     }
 
-    abstract public ViewModel load();
+    abstract public BaseViewModel load();
 }

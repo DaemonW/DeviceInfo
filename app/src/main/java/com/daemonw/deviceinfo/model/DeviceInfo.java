@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceInfo {
+public class DeviceInfo implements ListInfo{
     public String manufacturer;
     public String brand;
     public String model;
@@ -45,7 +45,7 @@ public class DeviceInfo {
     }
 
 
-    public List<ItemInfo> toInfoList() {
+    public List<ItemInfo> toList() {
         List<ItemInfo> infos = new ArrayList<>();
         infos.add(new ItemInfo("制造商", manufacturer));
         infos.add(new ItemInfo("品牌", brand));
