@@ -6,12 +6,18 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -31,7 +37,8 @@ import com.blankj.utilcode.util.FileIOUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ShellUtils;
 import com.daemonw.deviceinfo.model.NetworkInfo;
-import com.daemonw.deviceinfo.ui.main.CellularViewModel;
+import com.daemonw.deviceinfo.model.SocInfo;
+import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
@@ -47,6 +54,9 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
+import javax.microedition.khronos.egl.EGLConfig;
+import javax.microedition.khronos.opengles.GL10;
+
 
 public class MainActivity extends AppCompatActivity {
     private static final String[] REQUEST_PERM = new String[]{
@@ -57,27 +67,40 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.BODY_SENSORS};
     private static final int REQUEST_PERM_CODE = 1101;
 
-    private static final String[] PAGE = new String[]{"Hardware", "Identifier", "Network"};
+    private static final String[] PAGE = new String[]{"Hardware", "Soc", "Identifier", "Network"};
+    private LinearLayout mRootView;
     private TabLayout mTab;
     private ViewPager mPager;
     private Toolbar mToolbar;
+    private GLSurfaceView mSurfaceView;
 
     private NetworkInfoViewModel mNetworkViewModel;
     private DeviceInfoViewModel mDeviceViewModel;
     private IdentifierViewModel mIdentifierViewModel;
+    private SocViewModel mSocViewModel;
     private BroadcastReceiver mReceiver;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        mRootView = findViewById(R.id.container);
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mDeviceViewModel = new ViewModelProvider(MainActivity.this).get(DeviceInfoViewModel.class);
         mNetworkViewModel = new ViewModelProvider(MainActivity.this).get(NetworkInfoViewModel.class);
         mIdentifierViewModel = new ViewModelProvider(MainActivity.this).get(IdentifierViewModel.class);
+        mSocViewModel = new ViewModelProvider(MainActivity.this).get(SocViewModel.class);
         mTab = findViewById(R.id.tab_layout);
         mPager = findViewById(R.id.view_pager);
+        mSurfaceView = new GLSurfaceView(this);
+        mSurfaceView.setEGLContextClientVersion(1);
+        mSurfaceView.setEGLConfigChooser(8, 8, 8, 8, 0, 0);
+        GLSurfaceView.Renderer r = new SimpleRender();
+        mSurfaceView.setRenderer(r);
+        ViewGroup.LayoutParams lp = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, 1);
+        mSurfaceView.setLayoutParams(lp);
+        mRootView.addView(mSurfaceView);
         mPager.setAdapter(new InfoViewPager(getSupportFragmentManager()));
         mTab.setupWithViewPager(mPager);
         mTab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
@@ -173,9 +196,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void loadData() {
-        mDeviceViewModel.load();
-        mNetworkViewModel.load();
-        mIdentifierViewModel.load();
+        mDeviceViewModel.load(this);
+        mNetworkViewModel.load(this);
+        mIdentifierViewModel.load(this);
+        mSocViewModel.load(this);
     }
 
     class InfoViewPager extends FragmentPagerAdapter {
@@ -198,6 +222,9 @@ public class MainActivity extends AppCompatActivity {
                 case "IDENTIFIER":
                     fragment = ListInfoFragment.newInstance(mIdentifierViewModel);
                     break;
+                case "SOC":
+                    fragment = ListInfoFragment.newInstance(mSocViewModel);
+                    break;
                 default:
                     fragment = ListInfoFragment.newInstance(mDeviceViewModel);
                     break;
@@ -214,6 +241,60 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public CharSequence getPageTitle(int position) {
             return PAGE[position];
+        }
+    }
+
+    class SimpleRender implements GLSurfaceView.Renderer {
+        @Override
+        public void onSurfaceCreated(GL10 gl, EGLConfig eglConfig) {
+            String _gpu = gl.glGetString(GL10.GL_RENDERER);
+            String _gpuVendor = gl.glGetString(GL10.GL_VENDOR);
+            String _gpuVersion = gl.glGetString(GL10.GL_VERSION);
+            String _gpuExtension = gl.glGetString(GL10.GL_EXTENSIONS);
+            runOnUiThread(() -> {
+                Log.e("daemonw", "load GPU info");
+                SocInfo info = mSocViewModel.load(MainActivity.this).getValue();
+                SharedPreferences sp = getApplicationContext().getSharedPreferences("default", MODE_PRIVATE);
+                SharedPreferences.Editor editor = sp.edit();
+                String gpu = sp.getString("gpu", "");
+                if (gpu == null || gpu.isEmpty()) {
+                    gpu = _gpu;
+                    Log.e("daemonw", "gpu = " + gpu);
+                    editor.putString("gpu", gpu).apply();
+                }
+                String vendor = sp.getString("gpu_vendor", "");
+                if (vendor == null || vendor.isEmpty()) {
+                    vendor = _gpuVendor;
+                    Log.e("daemonw", "gpu vendor = " + vendor);
+                    editor.putString("gpu_vendor", vendor).apply();
+                }
+                String version = sp.getString("gpu_version", "");
+                if (version == null || version.isEmpty()) {
+                    version = _gpuVersion;
+                    Log.e("daemonw", "gpu version = " + version);
+                    editor.putString("gpu_version", version).apply();
+                }
+                String extension = sp.getString("gpu_extension", "");
+                if (extension == null || extension.isEmpty()) {
+                    extension = _gpuExtension;
+                    Log.e("daemonw", "gpu extension = " + extension);
+                    editor.putString("gpu_extension", extension).apply();
+                }
+                info.gpu = gpu;
+                info.gpuVendor = vendor;
+                info.gpuVersion = version;
+                mSocViewModel.setValue(info);
+            });
+        }
+
+        @Override
+        public void onSurfaceChanged(GL10 gl10, int i, int i1) {
+
+        }
+
+        @Override
+        public void onDrawFrame(GL10 gl10) {
+
         }
     }
 
@@ -235,9 +316,9 @@ public class MainActivity extends AppCompatActivity {
 
     private void exportDeviceInfo() {
         HashMap<String, Object> info = new HashMap<String, Object>();
-        info.put("device_info", mDeviceViewModel.load().getValue());
-        info.put("identifier_info", mIdentifierViewModel.load().getValue());
-        info.put("network_info", mNetworkViewModel.load().getValue());
+        info.put("device_info", mDeviceViewModel.load(this).getValue());
+        info.put("identifier_info", mIdentifierViewModel.load(this).getValue());
+        info.put("network_info", mNetworkViewModel.load(this).getValue());
         String content = GsonUtils.toJson(info);
         Context context = this;
         File dir = context.getExternalFilesDir("info");
@@ -270,7 +351,7 @@ public class MainActivity extends AppCompatActivity {
                 Map.Entry<String, Object> item = (Map.Entry<String, Object>) itor.next();
                 String key = trim(item.getKey());
                 String value = trim(item.getValue().toString());
-                fos.write(String.format(Locale.getDefault(),"%s,%s\n",key,value));
+                fos.write(String.format(Locale.getDefault(), "%s,%s\n", key, value));
             }
             fos.flush();
             fos.close();

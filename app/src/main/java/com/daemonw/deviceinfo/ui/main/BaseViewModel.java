@@ -1,5 +1,7 @@
 package com.daemonw.deviceinfo.ui.main;
 
+import android.content.Context;
+
 import androidx.lifecycle.MutableLiveData;
 import androidx.lifecycle.ViewModel;
 
@@ -19,5 +21,5 @@ public abstract class BaseViewModel<T> extends ViewModel {
         return this.info.getValue();
     }
 
-    abstract public BaseViewModel load();
+    abstract public BaseViewModel load(Context context);
 }

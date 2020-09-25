@@ -1,11 +1,13 @@
 package com.daemonw.deviceinfo.ui.main;
 
+import android.content.Context;
+
 import com.daemonw.deviceinfo.DeviceInfoManager;
 import com.daemonw.deviceinfo.model.DeviceInfo;
 
 public class DeviceInfoViewModel extends BaseViewModel<DeviceInfo> {
 
-    public DeviceInfoViewModel load() {
+    public DeviceInfoViewModel load(Context context) {
         DeviceInfo i = new DeviceInfo();
         DeviceInfoManager dm = DeviceInfoManager.get();
         i.marketName = dm.marketName();

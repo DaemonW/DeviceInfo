@@ -1,12 +1,14 @@
 package com.daemonw.deviceinfo.ui.main;
 
+import android.content.Context;
+
 import com.daemonw.deviceinfo.DeviceInfoManager;
 import com.daemonw.deviceinfo.model.IdentifierInfo;
 
-public class IdentifierViewModel extends BaseViewModel<IdentifierInfo>{
+public class IdentifierViewModel extends BaseViewModel<IdentifierInfo> {
 
     @Override
-    public IdentifierViewModel load() {
+    public IdentifierViewModel load(Context context) {
         IdentifierInfo i = new IdentifierInfo();
         DeviceInfoManager dm = DeviceInfoManager.get();
         i.androidId = dm.androidId();

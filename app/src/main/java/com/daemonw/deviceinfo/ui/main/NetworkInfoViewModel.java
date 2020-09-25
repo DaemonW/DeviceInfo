@@ -1,10 +1,12 @@
 package com.daemonw.deviceinfo.ui.main;
 
+import android.content.Context;
+
 import com.daemonw.deviceinfo.DeviceInfoManager;
 import com.daemonw.deviceinfo.model.NetworkInfo;
 
 public class NetworkInfoViewModel extends BaseViewModel<NetworkInfo> {
-    public NetworkInfoViewModel load(){
+    public NetworkInfoViewModel load(Context context){
         NetworkInfo i = new NetworkInfo();
         DeviceInfoManager dm = DeviceInfoManager.get();
         i.setBSSID(dm.wifiBSSID());

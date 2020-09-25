@@ -19,7 +19,7 @@ public class ItemInfo {
         this.type = type;
     }
 
-    public int getItemType(){
+    public int getItemType() {
         return type;
     }
 
@@ -32,6 +32,9 @@ public class ItemInfo {
     }
 
     public String getVal() {
+        if (val == null) {
+            return "";
+        }
         return val;
     }
 

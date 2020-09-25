@@ -1,10 +1,12 @@
 package com.daemonw.deviceinfo.ui.main;
 
+import android.content.Context;
+
 import com.daemonw.deviceinfo.DeviceInfoManager;
 import com.daemonw.deviceinfo.model.CellularInfo;
 
 public class CellularViewModel extends BaseViewModel<CellularInfo> {
-    public CellularViewModel load(){
+    public CellularViewModel load(Context context){
         CellularInfo i = new CellularInfo();
         DeviceInfoManager dm = DeviceInfoManager.get();
         i.setNetworkOperator(dm.networkOperator());

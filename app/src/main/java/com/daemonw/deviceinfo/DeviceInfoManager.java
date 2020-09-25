@@ -524,4 +524,8 @@ public class DeviceInfoManager {
         }
         return Reflect.on(tm).call("getNeighboringCellInfo").get();
     }
+
+    public String socPlatform(){
+        return getProp("ro.board.platform");
+    }
 }
