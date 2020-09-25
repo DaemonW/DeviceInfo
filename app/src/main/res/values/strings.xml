@@ -9,4 +9,6 @@
 
     <string name="tip_export_prop_success">export build prop successfully</string>
     <string name="tip_export_prop_failed">export build prop failed</string>
+    <string name = "tip">tip</string>
+    <string name = "tip_need_perm">You need to reserve som permissions to collect device information!</string>
 </resources>

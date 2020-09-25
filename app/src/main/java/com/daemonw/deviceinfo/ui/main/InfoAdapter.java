@@ -59,6 +59,7 @@ public class InfoAdapter extends RecyclerView.Adapter {
         switch (type) {
             case ItemInfo.TYPE_ITEM_HEADER:
                 infoHolder.tvKey.setText(info.getKey());
+                infoHolder.tvVal.setText(info.getVal());
                 break;
             case ItemInfo.TYPE_ITEM_INFO:
                 infoHolder.tvKey.setText(info.getKey());

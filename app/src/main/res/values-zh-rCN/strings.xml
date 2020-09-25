@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">设备信息</string>
+    <string name="export_device">导出设备信息</string>
+    <string name="export_sys_prop">导出系统build.prop</string>
+    <string name="view_sys_prop">查看系统build.prop</string>
+    <string name="open_location_service">打开位置服务</string>
+    <string name="tip_export_device_success">导出成功</string>
+    <string name="tip_export_device_failed">导出失败</string>
+
+    <string name="tip_export_prop_success">导出成功</string>
+    <string name="tip_export_prop_failed">导出失败</string>
+    <string name = "tip">注意</string>
+    <string name = "tip_need_perm">您需要授予应用相关权限来获取相应设备信息,您可手动在应用管理界面进行授权</string>
+</resources>

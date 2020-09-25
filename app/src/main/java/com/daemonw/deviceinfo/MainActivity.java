@@ -9,10 +9,12 @@ import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.LocationManager;
+import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -38,6 +40,7 @@ import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ShellUtils;
 import com.daemonw.deviceinfo.model.NetworkInfo;
 import com.daemonw.deviceinfo.model.SocInfo;
+import com.daemonw.deviceinfo.ui.main.SensorViewModel;
 import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
@@ -63,11 +66,16 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.WRITE_EXTERNAL_STORAGE,
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.READ_PHONE_STATE,
-            Manifest.permission.ACCESS_WIFI_STATE,
-            Manifest.permission.BODY_SENSORS};
+            Manifest.permission.ACCESS_WIFI_STATE};
     private static final int REQUEST_PERM_CODE = 1101;
 
-    private static final String[] PAGE = new String[]{"Hardware", "Soc", "Identifier", "Network"};
+    private static final String HARDWARE = "硬件";
+    private static final String SOC = "芯片";
+    private static final String IDENTIFIER = "设备标识";
+    private static final String NETWORK = "网络";
+    private static final String SENSOR = "传感器";
+
+    private static final String[] PAGE = new String[]{HARDWARE, SOC, IDENTIFIER, NETWORK, SENSOR};
     private LinearLayout mRootView;
     private TabLayout mTab;
     private ViewPager mPager;
@@ -78,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
     private DeviceInfoViewModel mDeviceViewModel;
     private IdentifierViewModel mIdentifierViewModel;
     private SocViewModel mSocViewModel;
+    private SensorViewModel mSensorModel;
     private BroadcastReceiver mReceiver;
 
     @Override
@@ -90,8 +99,10 @@ public class MainActivity extends AppCompatActivity {
         mDeviceViewModel = new ViewModelProvider(MainActivity.this).get(DeviceInfoViewModel.class);
         mNetworkViewModel = new ViewModelProvider(MainActivity.this).get(NetworkInfoViewModel.class);
         mIdentifierViewModel = new ViewModelProvider(MainActivity.this).get(IdentifierViewModel.class);
+        mSensorModel = new ViewModelProvider(MainActivity.this).get(SensorViewModel.class);
         mSocViewModel = new ViewModelProvider(MainActivity.this).get(SocViewModel.class);
         mTab = findViewById(R.id.tab_layout);
+        mTab.setTabMode(TabLayout.MODE_SCROLLABLE);
         mPager = findViewById(R.id.view_pager);
         mSurfaceView = new GLSurfaceView(this);
         mSurfaceView.setEGLContextClientVersion(1);
@@ -106,8 +117,8 @@ public class MainActivity extends AppCompatActivity {
         mTab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-                int pos = tab.getPosition();
-                mToolbar.setTitle(PAGE[pos]);
+//                int pos = tab.getPosition();
+//                mToolbar.setTitle(PAGE[pos]);
             }
 
             @Override
@@ -177,12 +188,12 @@ public class MainActivity extends AppCompatActivity {
                 loadData();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
-                        .setTitle("Tip")
-                        .setMessage("you need to reserve som permissions to collect device information!")
+                        .setTitle(R.string.tip)
+                        .setMessage(R.string.tip_need_perm)
                         .setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
-                                ActivityCompat.requestPermissions(MainActivity.this, REQUEST_PERM, REQUEST_PERM_CODE);
+                                gotoAppManagePage();
                             }
                         }).setNegativeButton(android.R.string.cancel, new DialogInterface.OnClickListener() {
                             @Override
@@ -195,11 +206,20 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void gotoAppManagePage() {
+        Intent intent = new Intent();
+        intent.setAction(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+        Uri uri = Uri.fromParts("package", getPackageName(), null);
+        intent.setData(uri);
+        startActivity(intent);
+    }
+
     private void loadData() {
         mDeviceViewModel.load(this);
         mNetworkViewModel.load(this);
         mIdentifierViewModel.load(this);
         mSocViewModel.load(this);
+        mSensorModel.load(this);
     }
 
     class InfoViewPager extends FragmentPagerAdapter {
@@ -213,17 +233,20 @@ public class MainActivity extends AppCompatActivity {
             Fragment fragment = null;
             String fragmentTag = PAGE[position].toUpperCase();
             switch (fragmentTag) {
-                case "NETWORK":
+                case NETWORK:
                     fragment = ListInfoFragment.newInstance(mNetworkViewModel);
                     break;
-                case "HARDWARE":
+                case HARDWARE:
                     fragment = ListInfoFragment.newInstance(mDeviceViewModel);
                     break;
-                case "IDENTIFIER":
+                case IDENTIFIER:
                     fragment = ListInfoFragment.newInstance(mIdentifierViewModel);
                     break;
-                case "SOC":
+                case SOC:
                     fragment = ListInfoFragment.newInstance(mSocViewModel);
+                    break;
+                case SENSOR:
+                    fragment = ListInfoFragment.newInstance(mSensorModel);
                     break;
                 default:
                     fragment = ListInfoFragment.newInstance(mDeviceViewModel);
@@ -316,9 +339,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void exportDeviceInfo() {
         HashMap<String, Object> info = new HashMap<String, Object>();
-        info.put("device_info", mDeviceViewModel.load(this).getValue());
-        info.put("identifier_info", mIdentifierViewModel.load(this).getValue());
-        info.put("network_info", mNetworkViewModel.load(this).getValue());
+        info.put("hardware", mDeviceViewModel.load(this).getValue());
+        info.put("identifier", mIdentifierViewModel.load(this).getValue());
+        info.put("network", mNetworkViewModel.load(this).getValue());
+        info.put("soc", mSocViewModel.load(this).getValue());
+        info.put("sensor", mSensorModel.load(this).getValue());
         String content = GsonUtils.toJson(info);
         Context context = this;
         File dir = context.getExternalFilesDir("info");
