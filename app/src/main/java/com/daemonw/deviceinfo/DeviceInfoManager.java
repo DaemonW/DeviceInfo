@@ -1,5 +1,6 @@
 package com.daemonw.deviceinfo;
 
+import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
@@ -55,6 +56,39 @@ public class DeviceInfoManager {
         return Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
+    private String getProp(String propKey) {
+        String value = Reflect.on("android.os.SystemProperties").call("get", propKey).get();
+        if (value == null) {
+            value = "";
+        }
+        return value;
+    }
+
+    private final String[] MARKET_NAME_KEY = new String[]{
+            "ro.semc.product.name",
+            "ro.config.marketing_name",
+            "ro.product.nickname",
+            "ro.config.devicename",
+            "persist.sys.devicename",
+            "persist.sys.exif.model",
+            "ro.oppo.market.name"};
+
+    public String marketName() {
+        String name = null;
+        for (String propKey : MARKET_NAME_KEY) {
+            name = getProp(propKey);
+            if (!name.isEmpty()) {
+                break;
+            }
+        }
+        if (name.isEmpty()) {
+            BluetoothAdapter myDevice = BluetoothAdapter.getDefaultAdapter();
+            name = myDevice.getName();
+        }
+        return name;
+    }
+
+    @SuppressLint("MissingPermission")
     public String imei(int slotIndex) {
         String imei = "";
         try {
@@ -89,7 +123,7 @@ public class DeviceInfoManager {
         return "";
     }
 
-
+    @SuppressLint("MissingPermission")
     public String meid(int slotIndex) {
         String meid = "";
         try {
@@ -124,6 +158,7 @@ public class DeviceInfoManager {
         return "";
     }
 
+    @SuppressLint("MissingPermission")
     public String imsi(int slotIndex) {
         //return tm.getSubscriberId();
         String imsi = "";
@@ -146,6 +181,7 @@ public class DeviceInfoManager {
         return imsi == null ? "" : imsi;
     }
 
+    @SuppressLint("MissingPermission")
     public String imsi1() {
         //return tm.getSubscriberId();
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
@@ -159,6 +195,7 @@ public class DeviceInfoManager {
         return Reflect.on(tm).call("getSubscriberId", 0).get();
     }
 
+    @SuppressLint("MissingPermission")
     public String imsi2() {
         //return tm.getSubscriberId();
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
@@ -172,6 +209,7 @@ public class DeviceInfoManager {
         return Reflect.on(tm).call("getSubscriberId", 1).get();
     }
 
+    @SuppressLint("MissingPermission")
     @RequiresApi(api = Build.VERSION_CODES.M)
     public void getSimInfoBySubscriptionManager() {
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
@@ -194,6 +232,8 @@ public class DeviceInfoManager {
         return Build.BRAND;
     }
 
+
+    @SuppressLint("MissingPermission")
     public String phoneNumber(int slotIndex) {
         String number = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
@@ -238,6 +278,7 @@ public class DeviceInfoManager {
     }
 
     //ICCID
+    @SuppressLint("MissingPermission")
     public String iccID(int slotIndex) {
         String iccId = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
@@ -301,6 +342,10 @@ public class DeviceInfoManager {
         return Build.VERSION.BASE_OS;
     }
 
+    public String incrementalVersion(){
+        return getProp("ro.build.version.incremental");
+    }
+
     public String buildTime() {
         return String.valueOf(Build.TIME);
     }
@@ -312,6 +357,11 @@ public class DeviceInfoManager {
 
     public String buildId() {
         return Build.ID;
+    }
+
+    //description
+    public String description(){
+        return getProp("ro.build.description");
     }
 
     //指纹
@@ -458,15 +508,17 @@ public class DeviceInfoManager {
         return String.valueOf(tm.getSimState());
     }
 
-    public List<CellInfo> getCellInfos() {
+    @SuppressLint("MissingPermission")
+    public List<CellInfo> getCellInfo() {
         return tm.getAllCellInfo();
     }
 
+    @SuppressLint("MissingPermission")
     public CellLocation getCellLocation() {
         return tm.getCellLocation();
     }
 
-    public List<NeighboringCellInfo> getNeighboringCellInfos() {
+    public List<NeighboringCellInfo> getNeighboringCellInfo() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             return null;
         }

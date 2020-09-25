@@ -18,9 +18,9 @@ public class CellularInfo implements ListInfo{
     private String networkCountryIso;
     private String simCountryIso;
     private String simState;
-    private List<CellInfo> cellInfos;
+    private List<CellInfo> cellInfo;
     private CellLocation cellLocation;
-    private List<NeighboringCellInfo> neighboringCellInfos;
+    private List<NeighboringCellInfo> neighboringCellInfo;
 
     public String getNetworkOperator() {
         return networkOperator;
@@ -62,12 +62,12 @@ public class CellularInfo implements ListInfo{
         this.simState = simState;
     }
 
-    public List<CellInfo> getCellInfos() {
-        return cellInfos;
+    public List<CellInfo> getCellInfo() {
+        return cellInfo;
     }
 
-    public void setCellInfos(List<CellInfo> cellInfos) {
-        this.cellInfos = cellInfos;
+    public void setCellInfo(List<CellInfo> cellInfos) {
+        this.cellInfo = cellInfos;
     }
 
     public CellLocation getCellLocation() {
@@ -78,12 +78,12 @@ public class CellularInfo implements ListInfo{
         this.cellLocation = cellLocation;
     }
 
-    public List<NeighboringCellInfo> getNeighboringCellInfos() {
-        return neighboringCellInfos;
+    public List<NeighboringCellInfo> getNeighboringCellInfo() {
+        return neighboringCellInfo;
     }
 
-    public void setNeighboringCellInfos(List<NeighboringCellInfo> neighboringCellInfos) {
-        this.neighboringCellInfos = neighboringCellInfos;
+    public void setNeighboringCellInfo(List<NeighboringCellInfo> neighboringCellInfo) {
+        this.neighboringCellInfo = neighboringCellInfo;
     }
 
     public String getNetworkOperatorName() {

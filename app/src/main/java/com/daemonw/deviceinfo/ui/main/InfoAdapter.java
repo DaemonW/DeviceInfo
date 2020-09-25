@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.daemonw.deviceinfo.R;
 import com.daemonw.deviceinfo.model.ItemInfo;
+import com.daemonw.deviceinfo.model.ListInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,23 +39,45 @@ public class InfoAdapter extends RecyclerView.Adapter {
     @NonNull
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        View itemView = LayoutInflater.from(context).inflate(R.layout.item_info, parent, false);
-        return new InfoHolder(itemView);
+        if (viewType == ItemInfo.TYPE_ITEM_INFO) {
+            View itemView = LayoutInflater.from(context).inflate(R.layout.item_info, parent, false);
+            return new InfoHolder(itemView);
+        } else {
+            View itemView = LayoutInflater.from(context).inflate(R.layout.item_header, parent, false);
+            return new InfoHolder(itemView);
+        }
     }
 
     @Override
     public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
         InfoHolder infoHolder = (InfoHolder) holder;
         ItemInfo info = infoList.get(position);
-        if (info != null) {
-            infoHolder.tvKey.setText(info.getKey());
-            infoHolder.tvVal.setText(info.getVal());
+        if (info == null) {
+            return;
+        }
+        int type = info.getItemType();
+        switch (type) {
+            case ItemInfo.TYPE_ITEM_HEADER:
+                infoHolder.tvKey.setText(info.getKey());
+                break;
+            case ItemInfo.TYPE_ITEM_INFO:
+                infoHolder.tvKey.setText(info.getKey());
+                infoHolder.tvVal.setText(info.getVal());
+                break;
+            default:
+                break;
         }
     }
 
     @Override
     public int getItemCount() {
         return infoList.size();
+    }
+
+    @Override
+    public int getItemViewType(int position) {
+        ItemInfo info = infoList.get(position);
+        return info.getItemType();
     }
 
     class InfoHolder extends RecyclerView.ViewHolder {

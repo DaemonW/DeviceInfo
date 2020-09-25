@@ -33,6 +33,7 @@ import com.blankj.utilcode.util.ShellUtils;
 import com.daemonw.deviceinfo.model.NetworkInfo;
 import com.daemonw.deviceinfo.ui.main.CellularViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
+import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
 import com.daemonw.deviceinfo.ui.main.NetworkInfoViewModel;
 import com.google.android.material.tabs.TabLayout;
@@ -42,6 +43,7 @@ import java.io.FileWriter;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
 
@@ -55,14 +57,14 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.BODY_SENSORS};
     private static final int REQUEST_PERM_CODE = 1101;
 
-    private static final String[] PAGE = new String[]{"Hardware", "Cellular", "Network"};
+    private static final String[] PAGE = new String[]{"Hardware", "Identifier", "Network"};
     private TabLayout mTab;
     private ViewPager mPager;
     private Toolbar mToolbar;
 
     private NetworkInfoViewModel mNetworkViewModel;
-    private CellularViewModel mCellularViewModel;
     private DeviceInfoViewModel mDeviceViewModel;
+    private IdentifierViewModel mIdentifierViewModel;
     private BroadcastReceiver mReceiver;
 
     @Override
@@ -72,8 +74,8 @@ public class MainActivity extends AppCompatActivity {
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
         mDeviceViewModel = new ViewModelProvider(MainActivity.this).get(DeviceInfoViewModel.class);
-        mCellularViewModel = new ViewModelProvider(MainActivity.this).get(CellularViewModel.class);
         mNetworkViewModel = new ViewModelProvider(MainActivity.this).get(NetworkInfoViewModel.class);
+        mIdentifierViewModel = new ViewModelProvider(MainActivity.this).get(IdentifierViewModel.class);
         mTab = findViewById(R.id.tab_layout);
         mPager = findViewById(R.id.view_pager);
         mPager.setAdapter(new InfoViewPager(getSupportFragmentManager()));
@@ -100,9 +102,7 @@ public class MainActivity extends AppCompatActivity {
         mReceiver = new Receiver();
         registerReceiver(mReceiver, filter);
         if (isPermissionGranted()) {
-            mDeviceViewModel.load();
-            mNetworkViewModel.load();
-            mCellularViewModel.load();
+            loadData();
         } else {
             ActivityCompat.requestPermissions(this, REQUEST_PERM, REQUEST_PERM_CODE);
         }
@@ -151,9 +151,7 @@ public class MainActivity extends AppCompatActivity {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         if (requestCode == REQUEST_PERM_CODE) {
             if (isPermissionGranted()) {
-                mDeviceViewModel.load();
-                mNetworkViewModel.load();
-                mCellularViewModel.load();
+                loadData();
             } else {
                 AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Tip")
@@ -174,6 +172,12 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void loadData() {
+        mDeviceViewModel.load();
+        mNetworkViewModel.load();
+        mIdentifierViewModel.load();
+    }
+
     class InfoViewPager extends FragmentPagerAdapter {
         public InfoViewPager(FragmentManager fm) {
             super(fm, FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT);
@@ -183,12 +187,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public Fragment getItem(int position) {
             Fragment fragment = null;
-            switch (position) {
-                case 1:
-                    fragment = ListInfoFragment.newInstance(mCellularViewModel);
-                    break;
-                case 2:
+            String fragmentTag = PAGE[position].toUpperCase();
+            switch (fragmentTag) {
+                case "NETWORK":
                     fragment = ListInfoFragment.newInstance(mNetworkViewModel);
+                    break;
+                case "HARDWARE":
+                    fragment = ListInfoFragment.newInstance(mDeviceViewModel);
+                    break;
+                case "IDENTIFIER":
+                    fragment = ListInfoFragment.newInstance(mIdentifierViewModel);
                     break;
                 default:
                     fragment = ListInfoFragment.newInstance(mDeviceViewModel);
@@ -228,7 +236,7 @@ public class MainActivity extends AppCompatActivity {
     private void exportDeviceInfo() {
         HashMap<String, Object> info = new HashMap<String, Object>();
         info.put("device_info", mDeviceViewModel.load().getValue());
-        info.put("cell_info", mCellularViewModel.load().getValue());
+        info.put("identifier_info", mIdentifierViewModel.load().getValue());
         info.put("network_info", mNetworkViewModel.load().getValue());
         String content = GsonUtils.toJson(info);
         Context context = this;
@@ -262,7 +270,7 @@ public class MainActivity extends AppCompatActivity {
                 Map.Entry<String, Object> item = (Map.Entry<String, Object>) itor.next();
                 String key = trim(item.getKey());
                 String value = trim(item.getValue().toString());
-                fos.write("$key,$value\n");
+                fos.write(String.format(Locale.getDefault(),"%s,%s\n",key,value));
             }
             fos.flush();
             fos.close();

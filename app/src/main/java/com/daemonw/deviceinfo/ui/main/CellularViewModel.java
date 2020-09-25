@@ -14,9 +14,9 @@ public class CellularViewModel extends BaseViewModel<CellularInfo> {
         i.setSimCountryIso(dm.simCountryIso());
         i.setSimOperatorName(dm.simOperatorName());
         i.setSimState(dm.simState());
-        i.setCellInfos(dm.getCellInfos());
+        i.setCellInfo(dm.getCellInfo());
         i.setCellLocation(dm.getCellLocation());
-        i.setNeighboringCellInfos(dm.getNeighboringCellInfos());
+        i.setNeighboringCellInfo(dm.getNeighboringCellInfo());
         this.setValue(i);
         return this;
     }

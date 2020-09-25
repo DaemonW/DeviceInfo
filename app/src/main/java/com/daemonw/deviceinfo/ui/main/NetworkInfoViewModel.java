@@ -12,6 +12,17 @@ public class NetworkInfoViewModel extends BaseViewModel<NetworkInfo> {
         i.setNetworkId(dm.networkId());
         i.setMac(dm.wifiMac());
         i.setVendor("unknown");
+
+        i.setNetworkOperator(dm.networkOperator());
+        i.setNetworkOperatorName(dm.networkOperatorName());
+        i.setSimOperator(dm.simOperator());
+        i.setNetworkCountryIso(dm.networkCountryIso());
+        i.setSimCountryIso(dm.simCountryIso());
+        i.setSimOperatorName(dm.simOperatorName());
+        i.setSimState(dm.simState());
+        i.setCellInfo(dm.getCellInfo());
+        i.setCellLocation(dm.getCellLocation());
+        i.setNeighboringCellInfo(dm.getNeighboringCellInfo());
         setValue(i);
         return this;
     }

@@ -39,16 +39,16 @@ public class ListInfoFragment<T> extends Fragment {
         adapter = new InfoAdapter(context, null);
         list.setLayoutManager(new LinearLayoutManager(context));
         list.setAdapter(adapter);
-        MutableLiveData<T> d = viewModel.get();
-        if(d!=null && d.getValue()!=null){
-            d.observe(getViewLifecycleOwner(), (v) -> {
-                if (v instanceof ListInfo) {
-                    ListInfo info = (ListInfo) v;
-                    adapter.setData(info.toList());
-                    adapter.notifyDataSetChanged();
-                }
-            });
-        }
+        viewModel.get().observe(getViewLifecycleOwner(), (v) -> {
+            if (v == null) {
+                return;
+            }
+            if (v instanceof ListInfo) {
+                ListInfo info = (ListInfo) v;
+                adapter.setData(info.toList());
+                adapter.notifyDataSetChanged();
+            }
+        });
         return root;
     }
 }
