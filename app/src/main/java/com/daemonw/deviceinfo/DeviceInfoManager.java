@@ -504,8 +504,8 @@ public class DeviceInfoManager {
         return tm.getSimCountryIso();
     }
 
-    public String simState() {
-        return String.valueOf(tm.getSimState());
+    public int simState() {
+        return tm.getSimState();
     }
 
     @SuppressLint("MissingPermission")

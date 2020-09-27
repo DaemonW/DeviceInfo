@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <array name="ns_menu_items">
+        <item>str_log_mobile</item>
+        <item>str_log_wifi</item>
+        <item>str_share_log_files</item>
+        <item>str_empty</item>
+        <item>str_no_signal_notification</item>
+        <item>str_get_external_ip</item>
+        <item>str_empty</item>
+        <item>str_settings</item>
+        <item>str_info</item>
+        <item>str_kaibits_software</item>
+        <item>str_buy_pro_version</item>
+        <item>str_empty</item>
+        <item>str_empty</item>
+    </array>
+    <array name="ns_menu_items_complete">
+        <item>str_cell_location</item>
+        <item>str_no_signal_notification</item>
+        <item>str_log_mobile</item>
+        <item>str_log_wifi</item>
+        <item>str_share_log_files</item>
+        <item>str_refresh_signals</item>
+        <item>str_get_external_ip</item>
+    </array>
+    <array name="ns_menu_items_icon">
+        <item>ic_action_settings</item>
+        <item>ic_save</item>
+        <item>action_add</item>
+        <item>ic_launcher_</item>
+        <item>action_add</item>
+        <item>ic_action_settings</item>
+        <item>ic_launcher_</item>
+    </array>
+    <array name="str_log_array">
+        <item>every second</item>
+        <item>every 2 seconds</item>
+        <item>every 5 seconds</item>
+        <item>every 10 seconds</item>
+        <item>every 30 seconds</item>
+        <item>every minute</item>
+    </array>
+    <array name="time_set">
+        <item>default timeout</item>
+        <item>1 minute</item>
+        <item>5 minutes</item>
+        <item>15 minutes</item>
+        <item>30 minutes</item>
+        <item>1 hour</item>
+        <item>2 hours</item>
+    </array>
+</resources>

@@ -1,109 +1,107 @@
 package com.daemonw.deviceinfo.model;
 
-import android.hardware.Sensor;
-
 import java.util.ArrayList;
 import java.util.List;
 
 public class SensorInfo implements ListInfo {
     //气压
-    public Sensor pSensor;
+    public SensorItem pressureSensor;
     //重力
-    public Sensor gSensor;
+    public SensorItem gravitySensor;
     //陀螺仪
-    public Sensor gyrSensor;
+    public SensorItem gyroscopeSensor;
     //磁强计
-    public Sensor mSensor;
+    public SensorItem magneticSensor;
     //测距
-    public Sensor dSensor;
+    public SensorItem proximitySensor;
     //加速
-    public Sensor aSensor;
+    public SensorItem accelerometerSensor;
     //线性加速
-    public Sensor laSensor;
+    public SensorItem lineAccelerometerSensor;
     //光感
-    public Sensor lSensor;
+    public SensorItem lightSensor;
     //方向传感器
-    public Sensor oSensor;
+    public SensorItem orientationSensor;
     //温度传感器
-    public Sensor temSensor;
+    public SensorItem temperatureSensor;
     //湿度传感器
-    public Sensor hSensor;
+    public SensorItem humiditySensor;
 
     @Override
     public List<ItemInfo> toList() {
         List<ItemInfo> info = new ArrayList<>();
-        if (pSensor == null) {
+        if (pressureSensor == null) {
             info.add(new ItemInfo("压力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("压力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(pSensor));
+            info.addAll(getSensorInfo(pressureSensor));
         }
-        if (gSensor == null) {
+        if (gravitySensor == null) {
             info.add(new ItemInfo("重力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("重力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(gSensor));
+            info.addAll(getSensorInfo(gravitySensor));
         }
-        if (oSensor == null) {
+        if (orientationSensor == null) {
             info.add(new ItemInfo("方向感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("方向感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(oSensor));
+            info.addAll(getSensorInfo(orientationSensor));
         }
-        if (gyrSensor == null) {
+        if (gyroscopeSensor == null) {
             info.add(new ItemInfo("陀螺仪", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("陀螺仪", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(gyrSensor));
+            info.addAll(getSensorInfo(gyroscopeSensor));
         }
-        if (mSensor == null) {
+        if (magneticSensor == null) {
             info.add(new ItemInfo("磁力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("磁力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(mSensor));
+            info.addAll(getSensorInfo(magneticSensor));
         }
-        if (dSensor == null) {
+        if (proximitySensor == null) {
             info.add(new ItemInfo("测距仪", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("测距仪", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(dSensor));
+            info.addAll(getSensorInfo(proximitySensor));
         }
-        if (aSensor == null) {
+        if (accelerometerSensor == null) {
             info.add(new ItemInfo("加速计", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("加速计", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(aSensor));
+            info.addAll(getSensorInfo(accelerometerSensor));
         }
-        if (laSensor == null) {
+        if (lineAccelerometerSensor == null) {
             info.add(new ItemInfo("线性加速计", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("线性加速计", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(laSensor));
+            info.addAll(getSensorInfo(lineAccelerometerSensor));
         }
-        if (lSensor == null) {
+        if (lightSensor == null) {
             info.add(new ItemInfo("光感器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("光感器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(lSensor));
+            info.addAll(getSensorInfo(lightSensor));
         }
 
-        if (temSensor == null) {
+        if (temperatureSensor == null) {
             info.add(new ItemInfo("温度感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("温度感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(temSensor));
+            info.addAll(getSensorInfo(temperatureSensor));
         }
 
-        if (hSensor == null) {
+        if (humiditySensor == null) {
             info.add(new ItemInfo("湿度感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
             info.add(new ItemInfo("湿度感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(hSensor));
+            info.addAll(getSensorInfo(humiditySensor));
         }
         return info;
     }
 
-    private List<ItemInfo> getSensorInfo(Sensor sensor) {
+    private List<ItemInfo> getSensorInfo(SensorItem sensor) {
         if (sensor == null) {
             return null;
         }

@@ -15,6 +15,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.provider.Settings;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -32,14 +33,17 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
 import com.blankj.utilcode.util.FileIOUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ShellUtils;
+import com.daemonw.deviceinfo.model.DeviceInfo;
 import com.daemonw.deviceinfo.model.NetworkInfo;
 import com.daemonw.deviceinfo.model.SocInfo;
+import com.daemonw.deviceinfo.ui.main.BaseViewModel;
 import com.daemonw.deviceinfo.ui.main.SensorViewModel;
 import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
@@ -68,14 +72,17 @@ public class MainActivity extends AppCompatActivity {
             Manifest.permission.READ_PHONE_STATE,
             Manifest.permission.ACCESS_WIFI_STATE};
     private static final int REQUEST_PERM_CODE = 1101;
+    public static final String ACTION_SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
 
-    private static final String HARDWARE = "硬件";
-    private static final String SOC = "芯片";
-    private static final String IDENTIFIER = "设备标识";
-    private static final String NETWORK = "网络";
-    private static final String SENSOR = "传感器";
+    private static final int HARDWARE = 0;
+    private static final int SOC = 1;
+    private static final int IDENTIFIER = 2;
+    private static final int NETWORK = 3;
+    private static final int SENSOR = 4;
 
-    private static final String[] PAGE = new String[]{HARDWARE, SOC, IDENTIFIER, NETWORK, SENSOR};
+    public static final int[] PAGE = new int[]{
+            R.string.page_hardware, R.string.page_soc, R.string.page_identifier, R.string.page_network, R.string.page_sensor
+    };
     private LinearLayout mRootView;
     private TabLayout mTab;
     private ViewPager mPager;
@@ -130,9 +137,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
         mTab.getTabAt(0).select();
-        mToolbar.setTitle(PAGE[0]);
+        mToolbar.setTitle(getString(PAGE[0]));
         IntentFilter filter = new IntentFilter();
         filter.addAction(LocationManager.PROVIDERS_CHANGED_ACTION);
+        filter.addAction(ACTION_SIM_STATE_CHANGED);
         mReceiver = new Receiver();
         registerReceiver(mReceiver, filter);
         if (isPermissionGranted()) {
@@ -230,26 +238,32 @@ public class MainActivity extends AppCompatActivity {
         @NonNull
         @Override
         public Fragment getItem(int position) {
-            Fragment fragment = null;
-            String fragmentTag = PAGE[position].toUpperCase();
-            switch (fragmentTag) {
+            ListInfoFragment fragment = null;
+            Bundle bundle = new Bundle();
+            switch (position) {
                 case NETWORK:
-                    fragment = ListInfoFragment.newInstance(mNetworkViewModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mNetworkViewModel);
                     break;
                 case HARDWARE:
-                    fragment = ListInfoFragment.newInstance(mDeviceViewModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mDeviceViewModel);
                     break;
                 case IDENTIFIER:
-                    fragment = ListInfoFragment.newInstance(mIdentifierViewModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mIdentifierViewModel);
                     break;
                 case SOC:
-                    fragment = ListInfoFragment.newInstance(mSocViewModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mSocViewModel);
                     break;
                 case SENSOR:
-                    fragment = ListInfoFragment.newInstance(mSensorModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mSensorModel);
                     break;
                 default:
-                    fragment = ListInfoFragment.newInstance(mDeviceViewModel);
+                    fragment = ListInfoFragment.newInstance(bundle);
+                    fragment.setViewModel(mDeviceViewModel);
                     break;
             }
             return fragment;
@@ -263,7 +277,23 @@ public class MainActivity extends AppCompatActivity {
         @Nullable
         @Override
         public CharSequence getPageTitle(int position) {
-            return PAGE[position];
+            return getString(PAGE[position]);
+        }
+    }
+
+    public <T> ViewModel getViewModel(T c) {
+        if(c instanceof DeviceInfoViewModel){
+            return mDeviceViewModel;
+        }else if(c instanceof IdentifierViewModel){
+            return mIdentifierViewModel;
+        }else if(c instanceof SocViewModel){
+            return mSocViewModel;
+        }else if(c instanceof SensorViewModel){
+            return mSensorModel;
+        }else if(c instanceof NetworkInfoViewModel){
+            return mNetworkViewModel;
+        }else{
+            throw new RuntimeException();
         }
     }
 
@@ -334,6 +364,13 @@ public class MainActivity extends AppCompatActivity {
                 ni.setSSID(DeviceInfoManager.get().wifiSSID());
                 mNetworkViewModel.setValue(ni);
             }
+
+            if (action.equals(ACTION_SIM_STATE_CHANGED)) {
+                NetworkInfo ni = mNetworkViewModel.getValue();
+                String state = NetworkInfoViewModel.getSimStateDescription(DeviceInfoManager.get().simState());
+                ni.setSimState(state);
+                mNetworkViewModel.setValue(ni);
+            }
         }
     }
 
@@ -347,7 +384,7 @@ public class MainActivity extends AppCompatActivity {
         String content = GsonUtils.toJson(info);
         Context context = this;
         File dir = context.getExternalFilesDir("info");
-        String fname = Build.BRAND + "_" + Build.MODEL;
+        String fname = Build.BRAND + "_" + Build.MODEL + "_device_info.json";
         boolean success = FileIOUtils.writeFileFromString(dir.getAbsolutePath() + "/" + fname, content);
         if (success) {
             Toast.makeText(context, R.string.tip_export_device_success, Toast.LENGTH_SHORT).show();

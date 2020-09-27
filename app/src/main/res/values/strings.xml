@@ -11,4 +11,10 @@
     <string name="tip_export_prop_failed">export build prop failed</string>
     <string name = "tip">tip</string>
     <string name = "tip_need_perm">You need to reserve som permissions to collect device information!</string>
+
+    <string name = "page_hardware">Hardware</string>
+    <string name = "page_soc">Soc</string>
+    <string name = "page_identifier">Identifier</string>
+    <string name = "page_network">Network</string>
+    <string name = "page_sensor">Sensor</string>
 </resources>

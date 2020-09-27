@@ -10,9 +10,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.MutableLiveData;
+import androidx.lifecycle.ViewModel;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.daemonw.deviceinfo.MainActivity;
 import com.daemonw.deviceinfo.R;
 import com.daemonw.deviceinfo.model.ListInfo;
 
@@ -21,14 +23,15 @@ public class ListInfoFragment<T> extends Fragment {
     private InfoAdapter adapter;
     private BaseViewModel<T> viewModel;
 
-    public static <T> ListInfoFragment newInstance(BaseViewModel<T> viewModel) {
-        return new ListInfoFragment(viewModel);
+    public static ListInfoFragment newInstance(Bundle bundle) {
+        ListInfoFragment fragment = new ListInfoFragment();
+        fragment.setArguments(bundle);
+        return fragment;
     }
 
-    private ListInfoFragment(BaseViewModel<T> viewModel) {
+    public void setViewModel(BaseViewModel<T> viewModel) {
         this.viewModel = viewModel;
     }
-
 
     @Nullable
     @Override
@@ -39,16 +42,18 @@ public class ListInfoFragment<T> extends Fragment {
         adapter = new InfoAdapter(context, null);
         list.setLayoutManager(new LinearLayoutManager(context));
         list.setAdapter(adapter);
-        viewModel.get().observe(getViewLifecycleOwner(), (v) -> {
-            if (v == null) {
-                return;
-            }
-            if (v instanceof ListInfo) {
-                ListInfo info = (ListInfo) v;
-                adapter.setData(info.toList());
-                adapter.notifyDataSetChanged();
-            }
-        });
+        if (viewModel != null) {
+            viewModel.get().observe(getViewLifecycleOwner(), (v) -> {
+                if (v == null) {
+                    return;
+                }
+                if (v instanceof ListInfo) {
+                    ListInfo info = (ListInfo) v;
+                    adapter.setData(info.toList());
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
         return root;
     }
 }
