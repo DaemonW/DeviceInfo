@@ -50,10 +50,14 @@ import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
 import com.daemonw.deviceinfo.ui.main.NetworkInfoViewModel;
+import com.daemonw.deviceinfo.util.AesUtil;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.Closeable;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.OutputStream;
 import java.io.StringReader;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -282,17 +286,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public <T> ViewModel getViewModel(T c) {
-        if(c instanceof DeviceInfoViewModel){
+        if (c instanceof DeviceInfoViewModel) {
             return mDeviceViewModel;
-        }else if(c instanceof IdentifierViewModel){
+        } else if (c instanceof IdentifierViewModel) {
             return mIdentifierViewModel;
-        }else if(c instanceof SocViewModel){
+        } else if (c instanceof SocViewModel) {
             return mSocViewModel;
-        }else if(c instanceof SensorViewModel){
+        } else if (c instanceof SensorViewModel) {
             return mSensorModel;
-        }else if(c instanceof NetworkInfoViewModel){
+        } else if (c instanceof NetworkInfoViewModel) {
             return mNetworkViewModel;
-        }else{
+        } else {
             throw new RuntimeException();
         }
     }
@@ -382,14 +386,35 @@ public class MainActivity extends AppCompatActivity {
         info.put("soc", mSocViewModel.load(this).getValue());
         info.put("sensor", mSensorModel.load(this).getValue());
         String content = GsonUtils.toJson(info);
+        byte[] key = AesUtil.randomBytes(32);
+        byte[] iv = AesUtil.randomBytes(16);
         Context context = this;
         File dir = context.getExternalFilesDir("info");
-        String fname = Build.BRAND + "_" + Build.MODEL + "_device_info.json";
-        boolean success = FileIOUtils.writeFileFromString(dir.getAbsolutePath() + "/" + fname, content);
-        if (success) {
+        String fname = Build.BRAND + "_" + Build.MODEL + "_device_info";
+        OutputStream out = null;
+        try {
+            out = new FileOutputStream(dir.getAbsolutePath() + "/" + fname);
+            out.write(iv);
+            out.write(key);
+            byte[] data = AesUtil.encrypt(content.getBytes(), key, iv);
+            out.write(data);
+            out.flush();
             Toast.makeText(context, R.string.tip_export_device_success, Toast.LENGTH_SHORT).show();
-        } else {
+        } catch (Exception e) {
             Toast.makeText(context, R.string.tip_export_device_failed, Toast.LENGTH_SHORT).show();
+        } finally {
+            closeSteamQuietly(out);
+        }
+    }
+
+    private void closeSteamQuietly(Closeable stream) {
+        if (stream == null) {
+            return;
+        }
+        try {
+            stream.close();
+        } catch (Exception e) {
+            //swallow
         }
     }
 
@@ -413,6 +438,7 @@ public class MainActivity extends AppCompatActivity {
                 Map.Entry<String, Object> item = (Map.Entry<String, Object>) itor.next();
                 String key = trim(item.getKey());
                 String value = trim(item.getValue().toString());
+                value = value.replace(",", " ");
                 fos.write(String.format(Locale.getDefault(), "%s,%s\n", key, value));
             }
             fos.flush();
