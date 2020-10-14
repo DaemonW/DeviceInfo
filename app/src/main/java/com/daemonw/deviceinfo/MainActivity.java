@@ -107,6 +107,7 @@ public class MainActivity extends AppCompatActivity {
         mRootView = findViewById(R.id.container);
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
         mDeviceViewModel = new ViewModelProvider(MainActivity.this).get(DeviceInfoViewModel.class);
         mNetworkViewModel = new ViewModelProvider(MainActivity.this).get(NetworkInfoViewModel.class);
         mIdentifierViewModel = new ViewModelProvider(MainActivity.this).get(IdentifierViewModel.class);
@@ -128,8 +129,8 @@ public class MainActivity extends AppCompatActivity {
         mTab.addOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
             @Override
             public void onTabSelected(TabLayout.Tab tab) {
-//                int pos = tab.getPosition();
-//                mToolbar.setTitle(PAGE[pos]);
+                int pos = tab.getPosition();
+                mToolbar.setTitle(PAGE[pos]);
             }
 
             @Override
