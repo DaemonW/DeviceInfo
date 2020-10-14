@@ -13,9 +13,7 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
-import android.preference.PreferenceManager;
 import android.provider.Settings;
-import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -37,19 +35,16 @@ import androidx.lifecycle.ViewModel;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager.widget.ViewPager;
 
-import com.blankj.utilcode.util.FileIOUtils;
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ShellUtils;
-import com.daemonw.deviceinfo.model.DeviceInfo;
 import com.daemonw.deviceinfo.model.NetworkInfo;
 import com.daemonw.deviceinfo.model.SocInfo;
-import com.daemonw.deviceinfo.ui.main.BaseViewModel;
-import com.daemonw.deviceinfo.ui.main.SensorViewModel;
-import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
 import com.daemonw.deviceinfo.ui.main.NetworkInfoViewModel;
+import com.daemonw.deviceinfo.ui.main.SensorViewModel;
+import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.util.AesUtil;
 import com.google.android.material.tabs.TabLayout;
 
@@ -59,6 +54,8 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.OutputStream;
 import java.io.StringReader;
+import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Locale;
@@ -99,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
     private SocViewModel mSocViewModel;
     private SensorViewModel mSensorModel;
     private BroadcastReceiver mReceiver;
+    private AdminManager adminManager;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -153,6 +151,7 @@ public class MainActivity extends AppCompatActivity {
         } else {
             ActivityCompat.requestPermissions(this, REQUEST_PERM, REQUEST_PERM_CODE);
         }
+        adminManager = new AdminManager(this);
     }
 
     @Override
@@ -173,7 +172,7 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.export_device: {
-                exportDeviceInfo();
+                exportDeviceInfos(true);
                 return true;
             }
 
@@ -372,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
 
             if (action.equals(ACTION_SIM_STATE_CHANGED)) {
                 NetworkInfo ni = mNetworkViewModel.getValue();
-                String state = NetworkInfoViewModel.getSimStateDescription(DeviceInfoManager.get().simState());
+                int state = DeviceInfoManager.get().simState();
                 ni.setSimState(state);
                 mNetworkViewModel.setValue(ni);
             }
@@ -395,6 +394,53 @@ public class MainActivity extends AppCompatActivity {
         OutputStream out = null;
         try {
             out = new FileOutputStream(dir.getAbsolutePath() + "/" + fname);
+            out.write(iv);
+            out.write(key);
+            byte[] data = AesUtil.encrypt(content.getBytes(), key, iv);
+            out.write(data);
+            out.flush();
+            Toast.makeText(context, R.string.tip_export_device_success, Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            Toast.makeText(context, R.string.tip_export_device_failed, Toast.LENGTH_SHORT).show();
+        } finally {
+            closeSteamQuietly(out);
+        }
+    }
+
+    private void exportDeviceInfos(boolean encrypted) {
+        HashMap<String, Object> info = new HashMap<String, Object>();
+        ArrayList<Object> objects = new ArrayList<>();
+        objects.add(mDeviceViewModel.load(this).getValue());
+        objects.add(mIdentifierViewModel.load(this).getValue());
+        objects.add(mNetworkViewModel.load(this).getValue());
+        objects.add(mSocViewModel.load(this).getValue());
+        objects.add(mSensorModel.load(this).getValue());
+        for (Object o : objects) {
+            Field[] field = o.getClass().getDeclaredFields();
+            for (Field f : field) {
+                f.setAccessible(true);
+                String key = f.getName();
+                try {
+                    Object val = f.get(o);
+                    info.put(key, val);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+        String content = GsonUtils.toJson(info);
+        byte[] key = AesUtil.randomBytes(32);
+        byte[] iv = AesUtil.randomBytes(16);
+        Context context = this;
+        File dir = context.getExternalFilesDir("info");
+        String fname = Build.BRAND + "_" + Build.MODEL + "_device_info";
+        OutputStream out = null;
+        try {
+            File f = new File(dir, fname);
+            if(f.exists()){
+                f.delete();
+            }
+            out = new FileOutputStream(f);
             out.write(iv);
             out.write(key);
             byte[] data = AesUtil.encrypt(content.getBytes(), key, iv);

@@ -4,9 +4,11 @@ import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
+import android.os.Environment;
 import android.provider.Settings;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
@@ -18,8 +20,13 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
+import com.blankj.utilcode.util.FileUtils;
+import com.blankj.utilcode.util.ShellUtils;
+import com.daemonw.deviceinfo.util.FileUtil;
+import com.daemonw.deviceinfo.util.IOUtil;
 import com.daemonw.deviceinfo.util.Reflect;
 
+import java.io.File;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.net.NetworkInterface;
@@ -34,6 +41,7 @@ public class DeviceInfoManager {
     private BluetoothManager bm;
     private SubscriptionManager sm;
     private static DeviceInfoManager dm;
+    private SharedPreferences sp;
 
     private DeviceInfoManager(Context context) {
         this.context = context;
@@ -42,6 +50,7 @@ public class DeviceInfoManager {
         bm = (BluetoothManager) context.getApplicationContext().getSystemService(Context.BLUETOOTH_SERVICE);
         //sm = (SubscriptionManager) SubscriptionManager.from(context);
         sm = (SubscriptionManager) context.getApplicationContext().getSystemService(Context.TELEPHONY_SUBSCRIPTION_SERVICE);
+        sp = context.getSharedPreferences("system_prop", Context.MODE_PRIVATE);
     }
 
     public static void init(Context context) {
@@ -56,22 +65,62 @@ public class DeviceInfoManager {
         return Settings.System.getString(context.getContentResolver(), Settings.Secure.ANDROID_ID);
     }
 
+    @SuppressLint("MissingPermission")
+    public String serial() {
+        String serial = sp.getString("ro.serialno", "");
+        if (serial != null && !serial.isEmpty()) {
+            return serial;
+        }
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.O) {
+            return Build.SERIAL;
+        }
+        serial = Build.getSerial();
+        if (serial.toUpperCase().equals("UNKNOWN")) {
+            serial = getProp("ro.serialno");
+        }
+        if (serial == null || serial.isEmpty()) {
+            serial = getProp("ro.boot.serialno");
+        }
+        File f = new File(Environment.getExternalStorageDirectory(), "serial.txt");
+        if (f.exists()) {
+            String content = FileUtil.readString(f.getAbsolutePath(), "utf-8");
+            if (content != null && !content.isEmpty()) {
+                serial = content.replace("\n","");
+                sp.edit().putString("ro.serialno", serial).apply();
+                f.delete();
+            }
+        }
+        return serial;
+    }
+
     private String getProp(String propKey) {
         String value = Reflect.on("android.os.SystemProperties").call("get", propKey).get();
-        if (value == null) {
-            value = "";
+        if (value == null || value.isEmpty()) {
+            value = getPropByShell(propKey);
+            if (value == null) {
+                value = "";
+            }
         }
         return value;
     }
 
+    private String getPropByShell(String propKey) {
+        ShellUtils.CommandResult result = ShellUtils.execCmd("getprop " + propKey, false);
+        if (result.result == 0) {
+            return result.successMsg;
+        }
+        return null;
+    }
+
     private final String[] MARKET_NAME_KEY = new String[]{
             "ro.semc.product.name",
-            "ro.config.marketing_name",
+            "ro.config.marketing_name",//for huawei
             "ro.product.nickname",
             "ro.config.devicename",
             "persist.sys.devicename",
             "persist.sys.exif.model",
-            "ro.oppo.market.name"};
+            "ro.product.product.device",//for oneplus
+            "ro.oppo.market.name"};//for oppo
 
     public String marketName() {
         String name = null;
@@ -163,11 +212,12 @@ public class DeviceInfoManager {
         //return tm.getSubscriberId();
         String imsi = "";
         List<SubscriptionInfo> list = sm.getActiveSubscriptionInfoList();
-        if (list != null) {
+        if (list != null && list.size() != 0) {
             for (SubscriptionInfo info : list) {
                 if (info.getSimSlotIndex() == slotIndex) {
+                    int subId = info.getSubscriptionId();
                     try {
-                        imsi = Reflect.on(tm).call("getSubscriberId", info.getSubscriptionId()).get();
+                        imsi = Reflect.on(tm).call("getSubscriberId", subId).get();
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -175,10 +225,7 @@ public class DeviceInfoManager {
                 }
             }
         }
-        if (imsi == null || imsi.isEmpty()) {
-            imsi = Reflect.on(tm).call("getSubscriberId", slotIndex).get();
-        }
-        return imsi == null ? "" : imsi;
+        return imsi;
     }
 
     @SuppressLint("MissingPermission")
@@ -192,7 +239,7 @@ public class DeviceInfoManager {
                 }
             }
         }
-        return Reflect.on(tm).call("getSubscriberId", 0).get();
+        return Reflect.on(tm).call("getSubscriberId", 1).get();
     }
 
     @SuppressLint("MissingPermission")
@@ -206,7 +253,7 @@ public class DeviceInfoManager {
                 }
             }
         }
-        return Reflect.on(tm).call("getSubscriberId", 1).get();
+        return Reflect.on(tm).call("getSubscriberId", 2).get();
     }
 
     @SuppressLint("MissingPermission")
@@ -342,7 +389,7 @@ public class DeviceInfoManager {
         return Build.VERSION.BASE_OS;
     }
 
-    public String incrementalVersion(){
+    public String incrementalVersion() {
         return getProp("ro.build.version.incremental");
     }
 
@@ -360,7 +407,7 @@ public class DeviceInfoManager {
     }
 
     //description
-    public String description(){
+    public String description() {
         return getProp("ro.build.description");
     }
 
@@ -525,7 +572,7 @@ public class DeviceInfoManager {
         return Reflect.on(tm).call("getNeighboringCellInfo").get();
     }
 
-    public String socPlatform(){
+    public String socPlatform() {
         return getProp("ro.board.platform");
     }
 }

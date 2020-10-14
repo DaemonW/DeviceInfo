@@ -3,6 +3,7 @@ package com.daemonw.deviceinfo.model;
 import android.telephony.CellInfo;
 import android.telephony.CellLocation;
 import android.telephony.NeighboringCellInfo;
+import android.telephony.TelephonyManager;
 
 import androidx.annotation.NonNull;
 
@@ -15,7 +16,7 @@ public class NetworkInfo implements ListInfo{
     private String bssid;
     private String networkId;
     private String mac;
-    private String manufacturer;
+    private String routerVendor;
 
     private String networkOperator;
     private String networkOperatorName;
@@ -23,7 +24,7 @@ public class NetworkInfo implements ListInfo{
     private String simOperatorName;
     private String networkCountryIso;
     private String simCountryIso;
-    private String simState;
+    private int simState;
     private List<CellInfo> cellInfo;
     private CellLocation cellLocation;
     private List<NeighboringCellInfo> neighboringCellInfo;
@@ -60,12 +61,16 @@ public class NetworkInfo implements ListInfo{
         this.mac = mac;
     }
 
-    public String getVendor() {
-        return manufacturer;
+    public String getRouterVendor() {
+        return routerVendor;
     }
 
-    public void setVendor(String vendor) {
-        this.manufacturer = vendor;
+    public void setRouterVendor(String vendor) {
+        this.routerVendor = vendor;
+    }
+
+    public void setSimState(int simState) {
+        this.simState = simState;
     }
 
     public String getNetworkOperator() {
@@ -116,14 +121,6 @@ public class NetworkInfo implements ListInfo{
         this.simCountryIso = simCountryIso;
     }
 
-    public String getSimState() {
-        return simState;
-    }
-
-    public void setSimState(String simState) {
-        this.simState = simState;
-    }
-
     public List<CellInfo> getCellInfo() {
         return cellInfo;
     }
@@ -152,7 +149,7 @@ public class NetworkInfo implements ListInfo{
     @Override
     public String toString() {
         return String.format(Locale.getDefault(), "BSSID = %s,\nSSID = %s,\nnetworkId = %s,\nmac = %s,\nvendor = %s",
-                bssid, ssid, networkId, mac, manufacturer);
+                bssid, ssid, networkId, mac, routerVendor);
     }
 
     public List<ItemInfo> toList() {
@@ -162,7 +159,7 @@ public class NetworkInfo implements ListInfo{
         infos.add(new ItemInfo("SSID", ssid));
         infos.add(new ItemInfo("网络id", networkId));
         infos.add(new ItemInfo("MAC地址", mac));
-        infos.add(new ItemInfo("制造商", manufacturer));
+        infos.add(new ItemInfo("路由器厂商", routerVendor));
 
         infos.add(new ItemInfo("手机网络","",ItemInfo.TYPE_ITEM_HEADER));
         infos.add(new ItemInfo("网络运行商", networkOperator));
@@ -171,8 +168,55 @@ public class NetworkInfo implements ListInfo{
         infos.add(new ItemInfo("SIM卡运行商", simOperator));
         infos.add(new ItemInfo("SIM卡运行商名称", simOperatorName));
         infos.add(new ItemInfo("SIM卡国家码", simCountryIso));
-        infos.add(new ItemInfo("SIM卡状态", simState));
+        infos.add(new ItemInfo("SIM卡状态", getSimStateDescription(simState)));
         return infos;
+    }
+
+    public static String getSimStateDescription(int state) {
+        String stateDescription;
+        switch (state) {
+            case TelephonyManager
+                    .SIM_STATE_ABSENT:
+                stateDescription = "absent";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_CARD_RESTRICTED:
+                stateDescription = "card_restricted";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_NETWORK_LOCKED:
+                stateDescription = "network_locked";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_NOT_READY:
+                stateDescription = "not_ready";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_READY:
+                stateDescription = "ready";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_PERM_DISABLED:
+                stateDescription = "perm_disabled";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_PIN_REQUIRED:
+                stateDescription = "pin_required";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_PUK_REQUIRED:
+                stateDescription = "puk_required";
+                break;
+            case TelephonyManager
+                    .SIM_STATE_UNKNOWN:
+                stateDescription = "unknown";
+                break;
+            default:
+                stateDescription = "unknown";
+                break;
+
+        }
+        return stateDescription;
     }
 }
 

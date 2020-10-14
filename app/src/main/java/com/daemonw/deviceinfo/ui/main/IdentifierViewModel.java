@@ -12,6 +12,7 @@ public class IdentifierViewModel extends BaseViewModel<IdentifierInfo> {
         IdentifierInfo i = new IdentifierInfo();
         DeviceInfoManager dm = DeviceInfoManager.get();
         i.androidId = dm.androidId();
+        i.serial = dm.serial();
         i.imei1 = dm.imei(0);
         i.imei2 = dm.imei(1);
         i.meid1 = dm.meid(0);

@@ -61,9 +61,9 @@ public class SensorInfo implements ListInfo {
             info.addAll(getSensorInfo(magneticSensor));
         }
         if (proximitySensor == null) {
-            info.add(new ItemInfo("测距仪", "未配置", ItemInfo.TYPE_ITEM_HEADER));
+            info.add(new ItemInfo("距离感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
         } else {
-            info.add(new ItemInfo("测距仪", "", ItemInfo.TYPE_ITEM_HEADER));
+            info.add(new ItemInfo("距离感应器", "", ItemInfo.TYPE_ITEM_HEADER));
             info.addAll(getSensorInfo(proximitySensor));
         }
         if (accelerometerSensor == null) {

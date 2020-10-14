@@ -10,6 +10,7 @@ public class DeviceInfo implements ListInfo{
     public String manufacturer;
     public String brand;
     public String model;
+    public String platform;
     public String device;
     public String display;
     public String osVersion;
@@ -40,9 +41,10 @@ public class DeviceInfo implements ListInfo{
         infos.add(new ItemInfo("制造商", manufacturer));
         infos.add(new ItemInfo("品牌", brand));
         infos.add(new ItemInfo("型号", model));
+        infos.add(new ItemInfo("平台", platform));
         infos.add(new ItemInfo("机型", device));
         infos.add(new ItemInfo("主板", board));
-        infos.add(new ItemInfo("平台", hardware));
+        infos.add(new ItemInfo("硬件", hardware));
         infos.add(new ItemInfo("Bootloader", bootloader));
         infos.add(new ItemInfo("显示版本", display));
         infos.add(new ItemInfo("修订版本", buildId));

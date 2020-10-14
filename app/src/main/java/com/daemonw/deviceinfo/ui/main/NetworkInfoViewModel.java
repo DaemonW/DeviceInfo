@@ -17,7 +17,7 @@ public class NetworkInfoViewModel extends BaseViewModel<NetworkInfo> {
         i.setSSID(dm.wifiSSID());
         i.setNetworkId(dm.networkId());
         i.setMac(dm.wifiMac());
-        i.setVendor(getVendorForRouter(context, i.getBSSID()));
+        i.setRouterVendor(getVendorForRouter(context, i.getBSSID()));
 
         i.setNetworkOperator(dm.networkOperator());
         i.setNetworkOperatorName(dm.networkOperatorName());
@@ -26,59 +26,12 @@ public class NetworkInfoViewModel extends BaseViewModel<NetworkInfo> {
         i.setSimCountryIso(dm.simCountryIso());
         i.setSimOperatorName(dm.simOperatorName());
         int state = dm.simState();
-        i.setSimState(getSimStateDescription(state));
+        i.setSimState(state);
         i.setCellInfo(dm.getCellInfo());
         i.setCellLocation(dm.getCellLocation());
         i.setNeighboringCellInfo(dm.getNeighboringCellInfo());
         setValue(i);
         return this;
-    }
-
-    public static String getSimStateDescription(int state) {
-        String stateDescription;
-        switch (state) {
-            case TelephonyManager
-                    .SIM_STATE_ABSENT:
-                stateDescription = "absent";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_CARD_RESTRICTED:
-                stateDescription = "card_restricted";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_NETWORK_LOCKED:
-                stateDescription = "network_locked";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_NOT_READY:
-                stateDescription = "not_ready";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_READY:
-                stateDescription = "ready";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_PERM_DISABLED:
-                stateDescription = "perm_disabled";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_PIN_REQUIRED:
-                stateDescription = "pin_required";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_PUK_REQUIRED:
-                stateDescription = "puk_required";
-                break;
-            case TelephonyManager
-                    .SIM_STATE_UNKNOWN:
-                stateDescription = "unknown";
-                break;
-            default:
-                stateDescription = "unknown";
-                break;
-
-        }
-        return stateDescription;
     }
 
     public static String getVendorForRouter(Context context, String macAddr) {

@@ -5,6 +5,7 @@ import java.util.List;
 
 public class IdentifierInfo implements ListInfo {
     public String androidId;
+    public String serial;
     public String imei1;
     public String imei2;
     public String imsi1;
@@ -20,6 +21,7 @@ public class IdentifierInfo implements ListInfo {
     public List<ItemInfo> toList() {
         List<ItemInfo> info = new ArrayList<>();
         info.add(new ItemInfo("Android Id", androidId));
+        info.add(new ItemInfo("SERIAL", serial));
         info.add(new ItemInfo("IMEI 1", imei1));
         info.add(new ItemInfo("IMEI 2", imei2));
         info.add(new ItemInfo("MEID 1", meid1));

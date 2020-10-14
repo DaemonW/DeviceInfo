@@ -14,6 +14,7 @@ public class DeviceInfoViewModel extends BaseViewModel<DeviceInfo> {
         i.manufacturer = dm.vendor();
         i.brand = dm.brand();
         i.model = dm.model();
+        i.platform = dm.socPlatform();
         i.osVersion = dm.osVersion();
         i.incrementalVersion = dm.incrementalVersion();
         i.bootloader = dm.bootloader();
