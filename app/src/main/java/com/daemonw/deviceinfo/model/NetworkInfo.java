@@ -155,20 +155,20 @@ public class NetworkInfo implements ListInfo{
     public List<ItemInfo> toList() {
         List<ItemInfo> infos = new ArrayList<>();
         infos.add(new ItemInfo("WiFi网络","",ItemInfo.TYPE_ITEM_HEADER));
-        infos.add(new ItemInfo("BSSID", bssid));
-        infos.add(new ItemInfo("SSID", ssid));
-        infos.add(new ItemInfo("网络id", networkId));
-        infos.add(new ItemInfo("MAC地址", mac));
-        infos.add(new ItemInfo("路由器厂商", routerVendor));
+        infos.add(new ItemInfo("BSSID", bssid,"bssid"));
+        infos.add(new ItemInfo("SSID", ssid,"ssid"));
+        infos.add(new ItemInfo("网络id", networkId,"networkId"));
+        infos.add(new ItemInfo("MAC地址", mac,"mac"));
+        infos.add(new ItemInfo("路由器厂商", routerVendor, "routerVendor"));
 
         infos.add(new ItemInfo("手机网络","",ItemInfo.TYPE_ITEM_HEADER));
-        infos.add(new ItemInfo("网络运行商", networkOperator));
-        infos.add(new ItemInfo("网络运行商名称", networkOperatorName));
-        infos.add(new ItemInfo("运行商国家码", networkCountryIso));
-        infos.add(new ItemInfo("SIM卡运行商", simOperator));
-        infos.add(new ItemInfo("SIM卡运行商名称", simOperatorName));
-        infos.add(new ItemInfo("SIM卡国家码", simCountryIso));
-        infos.add(new ItemInfo("SIM卡状态", getSimStateDescription(simState)));
+        infos.add(new ItemInfo("网络运行商", networkOperator, "networkOperator"));
+        infos.add(new ItemInfo("网络运行商名称", networkOperatorName, "networkOperatorName"));
+        infos.add(new ItemInfo("运行商国家码", networkCountryIso,"networkCountryIso"));
+        infos.add(new ItemInfo("SIM卡运行商", simOperator,"simOperator"));
+        infos.add(new ItemInfo("SIM卡运行商名称", simOperatorName,"simOperatorName"));
+        infos.add(new ItemInfo("SIM卡国家码", simCountryIso, "simCountryIso"));
+        infos.add(new ItemInfo("SIM卡状态", getSimStateDescription(simState), "simState"));
         return infos;
     }
 

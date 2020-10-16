@@ -18,15 +18,15 @@ public class SocInfo implements ListInfo {
     public List<ItemInfo> toList() {
         List<ItemInfo> info = new ArrayList<>();
         info.add(new ItemInfo("CPU信息", "", ItemInfo.TYPE_ITEM_HEADER));
-        info.add(new ItemInfo("CPU", cpu));
-        info.add(new ItemInfo("Processor", processor));
-        info.add(new ItemInfo("Feature", features));
-        info.add(new ItemInfo("Core", core));
+        info.add(new ItemInfo("CPU", cpu, "cpu"));
+        info.add(new ItemInfo("Processor", processor, "processor"));
+        info.add(new ItemInfo("Feature", features, "features"));
+        info.add(new ItemInfo("Core", core, "core"));
         //info.add(new ItemInfo("CPU信息", cpuInfo));
         info.add(new ItemInfo("GPU信息", "", ItemInfo.TYPE_ITEM_HEADER));
-        info.add(new ItemInfo("GPU", gpu));
-        info.add(new ItemInfo("Vendor", gpuVendor));
-        info.add(new ItemInfo("OpenGL ES", gpuVersion));
+        info.add(new ItemInfo("GPU", gpu, "gpu"));
+        info.add(new ItemInfo("Vendor", gpuVendor, "gpuVendor"));
+        info.add(new ItemInfo("OpenGL ES", gpuVersion, "gpuVersion"));
         return info;
     }
 }

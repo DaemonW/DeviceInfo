@@ -5,7 +5,7 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DeviceInfo implements ListInfo{
+public class DeviceInfo implements ListInfo {
     public String marketName;
     public String manufacturer;
     public String brand;
@@ -37,24 +37,24 @@ public class DeviceInfo implements ListInfo{
 
     public List<ItemInfo> toList() {
         List<ItemInfo> infos = new ArrayList<>();
-        infos.add(new ItemInfo("设备名称", marketName));
-        infos.add(new ItemInfo("制造商", manufacturer));
-        infos.add(new ItemInfo("品牌", brand));
-        infos.add(new ItemInfo("型号", model));
-        infos.add(new ItemInfo("平台", platform));
-        infos.add(new ItemInfo("机型", device));
-        infos.add(new ItemInfo("主板", board));
-        infos.add(new ItemInfo("硬件", hardware));
-        infos.add(new ItemInfo("Bootloader", bootloader));
-        infos.add(new ItemInfo("显示版本", display));
-        infos.add(new ItemInfo("修订版本", buildId));
-        infos.add(new ItemInfo("增量版本", incrementalVersion));
-        infos.add(new ItemInfo("系统版本", osVersion));
-        infos.add(new ItemInfo("描述", description));
-        infos.add(new ItemInfo("指纹", fingerPrint));
-        infos.add(new ItemInfo("编译时间", buildTime));
-        infos.add(new ItemInfo("WIFI MAC", wifiMac));
-        infos.add(new ItemInfo("蓝牙 MAC", bluetoothMac));
+        infos.add(new ItemInfo("设备名称", marketName, "marketName"));
+        infos.add(new ItemInfo("制造商", manufacturer, "manufacturer"));
+        infos.add(new ItemInfo("品牌", brand, "brand"));
+        infos.add(new ItemInfo("型号", model, "model"));
+        infos.add(new ItemInfo("平台", platform, "platform"));
+        infos.add(new ItemInfo("机型", device, "device"));
+        infos.add(new ItemInfo("主板", board, "board"));
+        infos.add(new ItemInfo("硬件", hardware, "hardware"));
+        infos.add(new ItemInfo("Bootloader", bootloader, "bootloader"));
+        infos.add(new ItemInfo("显示版本", display, "display"));
+        infos.add(new ItemInfo("修订版本", buildId, "buildId"));
+        infos.add(new ItemInfo("增量版本", incrementalVersion, "incrementalVersion"));
+        infos.add(new ItemInfo("系统版本", osVersion, "osVersion"));
+        infos.add(new ItemInfo("描述", description, "description"));
+        infos.add(new ItemInfo("指纹", fingerPrint, "fingerPrint"));
+        infos.add(new ItemInfo("编译时间", buildTime, "buildTime"));
+        infos.add(new ItemInfo("WIFI MAC", wifiMac, "wifiMac"));
+        infos.add(new ItemInfo("蓝牙 MAC", bluetoothMac, "bluetoothMac"));
         return infos;
     }
 

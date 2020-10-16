@@ -37,7 +37,10 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.blankj.utilcode.util.GsonUtils;
 import com.blankj.utilcode.util.ShellUtils;
+import com.daemonw.deviceinfo.model.DeviceInfo;
+import com.daemonw.deviceinfo.model.IdentifierInfo;
 import com.daemonw.deviceinfo.model.NetworkInfo;
+import com.daemonw.deviceinfo.model.SensorInfo;
 import com.daemonw.deviceinfo.model.SocInfo;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
@@ -410,11 +413,35 @@ public class MainActivity extends AppCompatActivity {
     private void exportDeviceInfos(boolean encrypted) {
         HashMap<String, Object> info = new HashMap<String, Object>();
         ArrayList<Object> objects = new ArrayList<>();
-        objects.add(mDeviceViewModel.load(this).getValue());
-        objects.add(mIdentifierViewModel.load(this).getValue());
-        objects.add(mNetworkViewModel.load(this).getValue());
-        objects.add(mSocViewModel.load(this).getValue());
-        objects.add(mSensorModel.load(this).getValue());
+        DeviceInfo di = mDeviceViewModel.getValue();
+        if (di == null) {
+            di = mDeviceViewModel.load(this).getValue();
+        }
+        objects.add(di);
+
+        IdentifierInfo ii = mIdentifierViewModel.getValue();
+        if (ii == null) {
+            ii = mIdentifierViewModel.load(this).getValue();
+        }
+        objects.add(ii);
+
+        NetworkInfo ni = mNetworkViewModel.getValue();
+        if (ni == null) {
+            ni = mNetworkViewModel.load(this).getValue();
+        }
+        objects.add(ni);
+
+        SocInfo si = mSocViewModel.getValue();
+        if (si == null) {
+            si = mSocViewModel.load(this).getValue();
+        }
+        objects.add(si);
+
+        SensorInfo ssi = mSensorModel.getValue();
+        if (ssi == null) {
+            ssi = mSensorModel.load(this).getValue();
+        }
+        objects.add(ssi);
         for (Object o : objects) {
             Field[] field = o.getClass().getDeclaredFields();
             for (Field f : field) {
@@ -437,7 +464,7 @@ public class MainActivity extends AppCompatActivity {
         OutputStream out = null;
         try {
             File f = new File(dir, fname);
-            if(f.exists()){
+            if (f.exists()) {
                 f.delete();
             }
             out = new FileOutputStream(f);

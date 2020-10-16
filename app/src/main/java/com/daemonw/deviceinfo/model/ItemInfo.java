@@ -6,17 +6,26 @@ public class ItemInfo {
     private int type;
     private String key;
     private String val;
+    private String tag;
+    private boolean checked;
 
     public ItemInfo(String key, String val) {
-        this.key = key;
-        this.val = val;
-        this.type = TYPE_ITEM_INFO;
+        this(key, val, TYPE_ITEM_INFO, "");
+    }
+
+    public ItemInfo(String key, String val, String tag) {
+        this(key, val, TYPE_ITEM_INFO, tag);
     }
 
     public ItemInfo(String key, String val, int type) {
+        this(key, val, type, "");
+    }
+
+    public ItemInfo(String key, String val, int type, String tag) {
         this.key = key;
         this.val = val;
         this.type = type;
+        this.tag = tag;
     }
 
     public int getItemType() {
@@ -40,5 +49,21 @@ public class ItemInfo {
 
     public void setVal(String val) {
         this.val = val;
+    }
+
+    public boolean isChecked() {
+        return checked;
+    }
+
+    public void setChecked(boolean checked) {
+        this.checked = checked;
+    }
+
+    public String getTag() {
+        return tag;
+    }
+
+    public void setTag(String tag) {
+        this.tag = tag;
     }
 }

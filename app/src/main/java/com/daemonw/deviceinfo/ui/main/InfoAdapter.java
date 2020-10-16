@@ -4,6 +4,7 @@ import android.content.Context;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -11,7 +12,6 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import com.daemonw.deviceinfo.R;
 import com.daemonw.deviceinfo.model.ItemInfo;
-import com.daemonw.deviceinfo.model.ListInfo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,6 +19,7 @@ import java.util.List;
 public class InfoAdapter extends RecyclerView.Adapter {
     private List<ItemInfo> infoList;
     private Context context;
+    private OnItemClickListener listener;
 
     public InfoAdapter(Context context, List<ItemInfo> data) {
         this.context = context;
@@ -68,6 +69,40 @@ public class InfoAdapter extends RecyclerView.Adapter {
             default:
                 break;
         }
+        if (info.getItemType() == ItemInfo.TYPE_ITEM_HEADER) {
+            return;
+        }
+        infoHolder.root.setOnClickListener((v -> {
+            if (listener != null) {
+                listener.onItemClicked(info, infoHolder, position);
+            }
+        }));
+        infoHolder.root.setOnLongClickListener((v) -> {
+            if (listener != null) {
+                listener.onItemLongClicked(info, infoHolder, position);
+            }
+            return true;
+        });
+//        boolean isChecked = info.isChecked();
+//        if (isChecked) {
+//            infoHolder.checkBox.setImageResource(R.mipmap.edit_unlock);
+//        } else {
+//            infoHolder.checkBox.setImageResource(R.mipmap.edit_lock);
+//        }
+//        infoHolder.checkBox.setOnClickListener((v) -> {
+//            boolean checked = !isChecked;
+//            info.setChecked(checked);
+//            if (checked) {
+//                infoHolder.checkBox.setImageResource(R.mipmap.edit_unlock);
+//            } else {
+//                infoHolder.checkBox.setImageResource(R.mipmap.edit_lock);
+//            }
+//            notifyItemChanged(position);
+//        });
+    }
+
+    public void setOnItemClickListener(OnItemClickListener listener) {
+        this.listener = listener;
     }
 
     @Override
@@ -81,14 +116,23 @@ public class InfoAdapter extends RecyclerView.Adapter {
         return info.getItemType();
     }
 
-    class InfoHolder extends RecyclerView.ViewHolder {
+    static class InfoHolder extends RecyclerView.ViewHolder {
+        private View root;
         private TextView tvKey;
         private TextView tvVal;
+        private ImageView checkBox;
 
         public InfoHolder(@NonNull View itemView) {
             super(itemView);
+            root = itemView.findViewById(R.id.root);;
             tvKey = itemView.findViewById(R.id.title);
             tvVal = itemView.findViewById(R.id.value);
+            checkBox = itemView.findViewById(R.id.checkbox);
         }
+    }
+
+    interface OnItemClickListener {
+        void onItemClicked(ItemInfo info, InfoHolder holder, int position);
+        void onItemLongClicked(ItemInfo info, InfoHolder holder, int position);
     }
 }

@@ -1,37 +1,50 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/root"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:minHeight="30dp"
-    android:background="#dddddd"
-    android:orientation="horizontal"
     android:layout_marginBottom="2dp"
+    android:background="#dddddd"
+    android:minHeight="30dp"
+    android:orientation="horizontal"
     android:paddingTop="3dp"
     android:paddingBottom="3dp">
 
     <TextView
-        android:layout_marginStart="10dp"
         android:id="@+id/title"
-        android:textSize="16sp"
-        android:textColor="#232323"
-        android:layout_gravity="center_vertical"
-        android:gravity="center_vertical"
         android:layout_width="100dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_vertical"
+        android:layout_marginStart="10dp"
+        android:gravity="center_vertical"
+        android:textColor="#232323"
+        android:textSize="16sp" />
+
     <FrameLayout
         android:layout_width="1dp"
-        android:background="#ffffff"
-        android:layout_height="match_parent"/>
+        android:layout_height="match_parent"
+        android:background="#ffffff" />
 
     <TextView
-        android:layout_weight="1"
         android:id="@+id/value"
-        android:layout_marginEnd="10dp"
-        android:textColor="#232323"
-        android:singleLine="false"
-        android:textSize="18sp"
-        android:gravity="center"
         android:layout_width="0dp"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="10dp"
+        android:layout_weight="1"
+        android:focusable="false"
+        android:gravity="center"
+        android:singleLine="false"
+        android:textColor="#232323"
+        android:textSize="18sp" />
+
+    <ImageView
+        android:id="@+id/checkbox"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center_vertical"
+        android:layout_marginRight="5dp"
+        android:scaleType="fitCenter"
+        android:src="@mipmap/edit_lock"
+        android:visibility="gone"/>
 
 </LinearLayout>
