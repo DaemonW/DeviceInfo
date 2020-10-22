@@ -1,104 +1,156 @@
 package com.daemonw.deviceinfo.model;
 
+import android.hardware.Sensor;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class SensorInfo implements ListInfo {
-    //气压
-    public SensorItem pressureSensor;
-    //重力
-    public SensorItem gravitySensor;
-    //陀螺仪
-    public SensorItem gyroscopeSensor;
-    //磁强计
-    public SensorItem magneticSensor;
-    //测距
-    public SensorItem proximitySensor;
-    //加速
-    public SensorItem accelerometerSensor;
-    //线性加速
-    public SensorItem lineAccelerometerSensor;
-    //光感
-    public SensorItem lightSensor;
-    //方向传感器
-    public SensorItem orientationSensor;
-    //温度传感器
-    public SensorItem temperatureSensor;
-    //湿度传感器
-    public SensorItem humiditySensor;
+    public static final int TYPE_TILT_DETECTOR = 22;
+    public static final int TYPE_WAKE_GESTURE = 23;
+    public static final int TYPE_GLANCE_GESTURE = 24;
+    public static final int TYPE_PICK_UP_GESTURE = 25;
+    public static final int TYPE_WRIST_TILT_GESTURE = 26;
+    public static final int TYPE_DEVICE_ORIENTATION = 27;
+
+    public static final int TYPE_DYNAMIC_SENSOR_META = 32;
+    public static final int TYPE_ADDITIONAL_INFO = 33;
+
+
+    SensorItem[] sensors;
 
     @Override
     public List<ItemInfo> toList() {
         List<ItemInfo> info = new ArrayList<>();
-        if (pressureSensor == null) {
-            info.add(new ItemInfo("压力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("压力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(pressureSensor));
-        }
-        if (gravitySensor == null) {
-            info.add(new ItemInfo("重力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("重力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(gravitySensor));
-        }
-        if (orientationSensor == null) {
-            info.add(new ItemInfo("方向感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("方向感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(orientationSensor));
-        }
-        if (gyroscopeSensor == null) {
-            info.add(new ItemInfo("陀螺仪", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("陀螺仪", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(gyroscopeSensor));
-        }
-        if (magneticSensor == null) {
-            info.add(new ItemInfo("磁力感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("磁力感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(magneticSensor));
-        }
-        if (proximitySensor == null) {
-            info.add(new ItemInfo("距离感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("距离感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(proximitySensor));
-        }
-        if (accelerometerSensor == null) {
-            info.add(new ItemInfo("加速计", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("加速计", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(accelerometerSensor));
-        }
-        if (lineAccelerometerSensor == null) {
-            info.add(new ItemInfo("线性加速计", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("线性加速计", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(lineAccelerometerSensor));
-        }
-        if (lightSensor == null) {
-            info.add(new ItemInfo("光感器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("光感器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(lightSensor));
-        }
-
-        if (temperatureSensor == null) {
-            info.add(new ItemInfo("温度感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("温度感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(temperatureSensor));
-        }
-
-        if (humiditySensor == null) {
-            info.add(new ItemInfo("湿度感应器", "未配置", ItemInfo.TYPE_ITEM_HEADER));
-        } else {
-            info.add(new ItemInfo("湿度感应器", "", ItemInfo.TYPE_ITEM_HEADER));
-            info.addAll(getSensorInfo(humiditySensor));
+        for (SensorItem item : sensors) {
+            String informalName = getInformalSensorName(item.getType(), item.getName());
+            info.add(new ItemInfo(informalName, "", ItemInfo.TYPE_ITEM_HEADER));
+            info.addAll(getSensorInfo(item));
         }
         return info;
+    }
+
+    private String getInformalSensorName(int sensorType, String sensorName) {
+        String name = sensorName;
+        switch (sensorType) {
+            case Sensor.TYPE_ACCELEROMETER:
+                name = "加速传感器";
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD:
+                name = "磁力传感器";
+                break;
+            case Sensor.TYPE_ORIENTATION:
+                name = "方向传感器";
+                break;
+            case Sensor.TYPE_GYROSCOPE:
+                name = "陀螺仪";
+                break;
+            case Sensor.TYPE_LIGHT:
+                name = "光线传感器";
+                break;
+            case Sensor.TYPE_PRESSURE:
+                name = "压力传感器";
+                break;
+            case Sensor.TYPE_TEMPERATURE:
+                name = "温度传感器";
+                break;
+            case Sensor.TYPE_PROXIMITY:
+                name = "接近传感器";
+                break;
+            case Sensor.TYPE_GRAVITY:
+                name = "重力传感器";
+                break;
+            case Sensor.TYPE_LINEAR_ACCELERATION:
+                name = "线性加速传感器";
+                break;
+            case Sensor.TYPE_ROTATION_VECTOR:
+                name = "旋转矢量传感器";
+                break;
+            case Sensor.TYPE_RELATIVE_HUMIDITY:
+                name = "湿度传感器";
+                break;
+            case Sensor.TYPE_AMBIENT_TEMPERATURE:
+                name = "外部温度传感器";
+                break;
+            case Sensor.TYPE_MAGNETIC_FIELD_UNCALIBRATED:
+                name = "磁力传感器(未校准)";
+                break;
+            case Sensor.TYPE_GAME_ROTATION_VECTOR:
+                name = "游戏旋转矢量传感器";
+                break;
+            case Sensor.TYPE_GYROSCOPE_UNCALIBRATED:
+                name = "陀螺仪(未校准)";
+                break;
+            case Sensor.TYPE_SIGNIFICANT_MOTION:
+                name = "特殊动作传感器";
+                break;
+            case Sensor.TYPE_STEP_DETECTOR:
+                name = "步行检测传感器";
+                break;
+            case Sensor.TYPE_STEP_COUNTER:
+                name = "计步传感器";
+                break;
+            case Sensor.TYPE_GEOMAGNETIC_ROTATION_VECTOR:
+                name = "地磁旋转矢量传感器";
+                break;
+            case Sensor.TYPE_HEART_RATE:
+                name = "心率传感器";
+                break;
+            case TYPE_TILT_DETECTOR:
+                name = "倾斜传感器";
+                break;
+            case TYPE_WAKE_GESTURE:
+                name = "手势唤醒传感器";
+                break;
+            case TYPE_GLANCE_GESTURE:
+                name = "掠过手势传感器";
+                break;
+            case TYPE_PICK_UP_GESTURE:
+                name = "拾起手势传感器";
+                break;
+            case TYPE_WRIST_TILT_GESTURE:
+                name = "手腕倾斜传感器";
+                break;
+            case TYPE_DEVICE_ORIENTATION:
+                name = "设备方向传感器";
+                break;
+            case Sensor.TYPE_POSE_6DOF:
+                name = "6自由度姿势传感器";
+                break;
+            case Sensor.TYPE_STATIONARY_DETECT:
+                name = "静止检测传感器";
+                break;
+            case Sensor.TYPE_MOTION_DETECT:
+                name = "运动检测传感器";
+                break;
+            case Sensor.TYPE_HEART_BEAT:
+                name = "心跳传感器";
+                break;
+            case TYPE_DYNAMIC_SENSOR_META:
+                name = "动态传感器元数据";
+                break;
+            case TYPE_ADDITIONAL_INFO:
+                name = "附加信息";
+                break;
+            case Sensor.TYPE_LOW_LATENCY_OFFBODY_DETECT:
+                name = "低延迟身体检测传感器";
+                break;
+            case Sensor.TYPE_ACCELEROMETER_UNCALIBRATED:
+                name = "加速传感器(未校准)";
+                break;
+            default:
+                name = name.toUpperCase();
+                break;
+        }
+        return name;
+    }
+
+    public SensorItem[] getSensors() {
+        return sensors;
+    }
+
+    public void setSensors(SensorItem[] sensors) {
+        this.sensors = sensors;
     }
 
     private List<ItemInfo> getSensorInfo(SensorItem sensor) {
@@ -110,7 +162,7 @@ public class SensorInfo implements ListInfo {
         sensorInfo.add(new ItemInfo("名称", name));
         String vendor = sensor.getVendor();
         sensorInfo.add(new ItemInfo("厂商", vendor));
-        String type = sensor.getType()+"";
+        String type = sensor.getType() + "";
         sensorInfo.add(new ItemInfo("类型", type));
         return sensorInfo;
     }
