@@ -2,17 +2,20 @@ package com.daemonw.deviceinfo;
 
 import android.Manifest;
 import android.content.BroadcastReceiver;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.database.sqlite.SQLiteDatabase;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
@@ -40,8 +43,11 @@ import com.blankj.utilcode.util.ShellUtils;
 import com.daemonw.deviceinfo.model.DeviceInfo;
 import com.daemonw.deviceinfo.model.IdentifierInfo;
 import com.daemonw.deviceinfo.model.NetworkInfo;
+import com.daemonw.deviceinfo.model.OkHttpFactory;
 import com.daemonw.deviceinfo.model.SensorInfo;
 import com.daemonw.deviceinfo.model.SocInfo;
+import com.daemonw.deviceinfo.model.db.DatabaseHelper;
+import com.daemonw.deviceinfo.model.db.DatabaseManager;
 import com.daemonw.deviceinfo.ui.main.DeviceInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.IdentifierViewModel;
 import com.daemonw.deviceinfo.ui.main.ListInfoFragment;
@@ -49,24 +55,39 @@ import com.daemonw.deviceinfo.ui.main.NetworkInfoViewModel;
 import com.daemonw.deviceinfo.ui.main.SensorViewModel;
 import com.daemonw.deviceinfo.ui.main.SocViewModel;
 import com.daemonw.deviceinfo.util.AesUtil;
+import com.daemonw.deviceinfo.util.CSVUtils;
+import com.daemonw.deviceinfo.util.IOUtil;
 import com.google.android.material.tabs.TabLayout;
 
+import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.StringReader;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
+
+import okhttp3.Call;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.Response;
+import okhttp3.ResponseBody;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -100,11 +121,14 @@ public class MainActivity extends AppCompatActivity {
     private SensorViewModel mSensorModel;
     private BroadcastReceiver mReceiver;
     private AdminManager adminManager;
+    private Handler mHandler;
+    private ExecutorService mThreadPool = Executors.newFixedThreadPool(1);
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main_activity);
+        mHandler = new Handler(getMainLooper());
         mRootView = findViewById(R.id.container);
         mToolbar = findViewById(R.id.toolbar);
         setSupportActionBar(mToolbar);
@@ -175,12 +199,23 @@ public class MainActivity extends AppCompatActivity {
         int id = item.getItemId();
         switch (id) {
             case R.id.export_device: {
-                exportDeviceInfos(true);
+                exportDeviceInfo();
                 return true;
             }
 
             case R.id.export_sys_prop: {
                 exportBuildProp();
+                break;
+            }
+
+            case R.id.update_support_devices: {
+                updateSupportDeviceList();
+                break;
+            }
+
+            case R.id.export_support_devices: {
+                exportSupportDevicesDB();
+                break;
             }
         }
         return super.onOptionsItemSelected(item);
@@ -368,12 +403,18 @@ public class MainActivity extends AppCompatActivity {
             }
             if (action.equals(LocationManager.PROVIDERS_CHANGED_ACTION)) {
                 NetworkInfo ni = mNetworkViewModel.getValue();
+                if (ni == null) {
+                    return;
+                }
                 ni.setSSID(DeviceInfoManager.get().wifiSSID());
                 mNetworkViewModel.setValue(ni);
             }
 
             if (action.equals(ACTION_SIM_STATE_CHANGED)) {
                 NetworkInfo ni = mNetworkViewModel.getValue();
+                if (ni == null) {
+                    return;
+                }
                 int state = DeviceInfoManager.get().simState();
                 ni.setSimState(state);
                 mNetworkViewModel.setValue(ni);
@@ -381,7 +422,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void exportDeviceInfo() {
+    private void exportSectionDeviceInfo() {
         HashMap<String, Object> info = new HashMap<String, Object>();
         info.put("hardware", mDeviceViewModel.load(this).getValue());
         info.put("identifier", mIdentifierViewModel.load(this).getValue());
@@ -410,7 +451,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void exportDeviceInfos(boolean encrypted) {
+    private void exportDeviceInfo() {
         HashMap<String, Object> info = new HashMap<String, Object>();
         ArrayList<Object> objects = new ArrayList<>();
         DeviceInfo di = mDeviceViewModel.getValue();
@@ -525,5 +566,159 @@ public class MainActivity extends AppCompatActivity {
 
     private String trim(String str) {
         return str.substring(1, str.length() - 1);
+    }
+
+    private void exportSupportDevicesDB() {
+        File f = getDatabasePath("device.db");
+        if (f.exists()) {
+            long len = f.length();
+            File temp = getExternalFilesDir("temp");
+            if (!temp.exists()) {
+                temp.mkdirs();
+            }
+            File db = new File(temp, "device.db");
+            FileInputStream fin = null;
+            FileOutputStream fos = null;
+            try {
+                fin = new FileInputStream(f);
+                fos = new FileOutputStream(db);
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(this, "export failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                return;
+            }
+            boolean success = IOUtil.copy(fin, fos, null);
+            if (success) {
+                Toast.makeText(this, "export success", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "export failed", Toast.LENGTH_SHORT).show();
+            }
+        } else {
+            Toast.makeText(this, "db file is not existed", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void updateSupportDeviceList() {
+        final ProgressDialog dialog = new ProgressDialog.Builder(this)
+                .setTitle("Downloading")
+                .create();
+        dialog.show();
+        mThreadPool.submit(() -> {
+            try {
+                updateSupportDeviceData(new IOUtil.OnProcessListener() {
+                    @Override
+                    public void onUpdate(int progress) {
+                        mHandler.post(() -> {
+                            dialog.setProgress(progress);
+                        });
+                    }
+                });
+            } catch (Exception e) {
+                e.printStackTrace();
+                mHandler.post(() -> {
+                    dialog.dismiss();
+                    Toast.makeText(this, "update failed: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+                });
+                return;
+            }
+            mHandler.post(() -> {
+                dialog.dismiss();
+                Toast.makeText(this, "update success", Toast.LENGTH_SHORT).show();
+            });
+        });
+    }
+
+    private void updateSupportDeviceData(IOUtil.OnProcessListener listener) throws Exception {
+        File temp = getExternalFilesDir("temp");
+        if (temp != null && !temp.exists()) {
+            temp.mkdirs();
+        }
+        File csvFile = new File(temp, "device_support_list.csv");
+        String filePath = csvFile.getAbsolutePath();
+        boolean success = downloadDeviceSupportList(filePath, listener);
+        if (!success) {
+            throw new IOException("download file failed");
+        }
+        FileInputStream fin = new FileInputStream(csvFile);
+        InputStreamReader in = new InputStreamReader(fin, "UTF-16LE");
+        BufferedReader reader = new BufferedReader(in);
+        DatabaseManager dbm = DatabaseManager.get();
+        SQLiteDatabase db = dbm.getConnection();
+        db.beginTransaction();
+        String line = null;
+        int count = 0;
+        while ((line = reader.readLine()) != null) {
+            List<String> record = CSVUtils.parseLine(line);
+            if (record.size() != 4) {
+                continue;
+            }
+            count++;
+            ContentValues cv = new ContentValues();
+            String brand = record.get(0);
+            cv.put("brand", unicodeToUtf8(brand).toUpperCase());
+            String marketName = record.get(1);
+            cv.put("market_name", unicodeToUtf8(marketName).toUpperCase());
+            String device = record.get(2);
+            cv.put("device", unicodeToUtf8(device).toUpperCase());
+            String model = record.get(3);
+            cv.put("model", unicodeToUtf8(model).toUpperCase());
+            db.insertWithOnConflict(DatabaseHelper.TABLE_DEVICES, null, cv, SQLiteDatabase.CONFLICT_IGNORE);
+        }
+        Log.e("daemonw", "update rows: " + count);
+        db.setTransactionSuccessful();
+        db.endTransaction();
+        csvFile.delete();
+    }
+
+    String unicodeToUtf8(String s) {
+        if (s == null || s.isEmpty()) {
+            return "";
+        }
+        try {
+            return new String(s.getBytes("UTF-8"), "UTF-8");
+        } catch (Exception e) {
+            return "";
+        }
+    }
+
+    private boolean downloadDeviceSupportList(String filePath, IOUtil.OnProcessListener listener) {
+        File file = new File(filePath);
+        if (file.exists()) {
+            file.delete();
+        }
+        OkHttpClient client = OkHttpFactory.client(true);
+        Request req = OkHttpFactory.newRequest("https://storage.googleapis.com/play_public/supported_devices.csv", null, true);
+        Call call = client.newCall(req);
+        ResponseBody body = null;
+        FileOutputStream fos = null;
+        long fileLen = 0;
+        try {
+            Response resp = call.execute();
+            if (!resp.isSuccessful()) {
+                return false;
+            }
+            String contentLength = resp.header("Content-Length");
+            if (contentLength != null) {
+                fileLen = Long.parseLong(contentLength);
+            }
+            body = resp.body();
+            if (body == null) {
+                return false;
+            }
+            fos = new FileOutputStream(file);
+        } catch (Exception e) {
+            e.printStackTrace();
+            file.delete();
+            return false;
+        }
+        if (fileLen <= 0) {
+            return false;
+        }
+        listener.setSize(fileLen);
+        boolean success = IOUtil.copy(body.byteStream(), fos, listener);
+        if (!success) {
+            file.delete();
+        }
+        return success;
     }
 }

@@ -2,6 +2,9 @@ package com.daemonw.deviceinfo;
 
 import android.app.Application;
 
+import com.daemonw.deviceinfo.model.OkHttpFactory;
+import com.daemonw.deviceinfo.model.db.DatabaseManager;
+
 public class App extends Application {
     private static App instance;
 
@@ -9,10 +12,12 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
         instance = this;
+        DatabaseManager.initialize(this, "db-pass", "device.db");
         DeviceInfoManager.init(this);
+        OkHttpFactory.init();
     }
 
-    private static App get() {
+    public static synchronized App get() {
         return instance;
     }
 }

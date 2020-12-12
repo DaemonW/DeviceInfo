@@ -3,6 +3,7 @@ package com.daemonw.deviceinfo.util;
 import java.io.ByteArrayOutputStream;
 import java.io.Closeable;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -75,26 +76,30 @@ public class IOUtil {
     }
 
 
-    public static void copy(InputStream in, OutputStream out) {
-        if (in == null || out == null) {
-            return;
-        }
+    public static boolean copy(InputStream in, OutputStream out, OnProcessListener listener) {
+        boolean success = false;
         try {
             byte[] buffer = new byte[4096];
             int nRead = 0;
             while ((nRead = in.read(buffer)) > 0) {
                 out.write(buffer, 0, nRead);
+                if (listener != null) {
+                    listener.onProcess(out, buffer, 0, nRead);
+                }
             }
             out.flush();
             if (out instanceof FileOutputStream) {
                 ((FileOutputStream) out).getFD().sync();
             }
+            success = true;
         } catch (Exception e) {
             e.printStackTrace();
+            success = false;
         } finally {
             IOUtil.closeStream(in);
             IOUtil.closeStream(out);
         }
+        return success;
     }
 
 
@@ -105,6 +110,49 @@ public class IOUtil {
             } catch (Exception e) {
                 e.printStackTrace();
             }
+        }
+    }
+
+    public static abstract class OnProcessListener {
+        protected long size;
+        private long processed;
+        protected int progress;
+        protected long triggered;
+        protected final long interval = 100;
+
+        public OnProcessListener() {
+        }
+
+        public void setSize(long size) {
+            this.size = size;
+        }
+
+        public void setProcessed(long processed) {
+            this.processed = processed;
+        }
+
+        void onProcess(OutputStream out, byte[] buff, int offset, int len) throws IOException {
+            processed += len;
+            progress = (int) (processed * 100 / size);
+            long now = System.currentTimeMillis();
+            if (now - triggered >= interval) {
+                triggered = now;
+                onUpdate(progress);
+            } else {
+                if (size - processed <= 8192) {
+                    onUpdate(progress);
+                }
+            }
+        }
+
+        public abstract void onUpdate(int progress);
+
+        protected void onFinish() {
+
+        }
+
+        protected void onFail(Exception e) {
+
         }
     }
 }

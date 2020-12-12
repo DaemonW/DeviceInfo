@@ -8,8 +8,12 @@
         android:id="@+id/export_sys_prop"
         android:title="@string/export_sys_prop" />
 
-<!--    <item-->
-<!--        android:id="@+id/view_sys_prop"-->
-<!--        android:title="@string/view_sys_prop" />-->
+    <item
+        android:id="@+id/update_support_devices"
+        android:title="@string/update_support_devices" />
+
+    <item
+        android:id="@+id/export_support_devices"
+        android:title="@string/export_support_devices" />
 
 </menu>

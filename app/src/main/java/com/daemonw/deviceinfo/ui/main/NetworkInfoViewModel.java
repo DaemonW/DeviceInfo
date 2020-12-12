@@ -38,7 +38,7 @@ public class NetworkInfoViewModel extends BaseViewModel<NetworkInfo> {
         if (MAC_VENDOR == null) {
             MAC_VENDOR = context.getResources().getStringArray(R.array.mac_manufacturer);
         }
-        if (MAC_VENDOR == null) {
+        if (macAddr == null) {
             return "unknown";
         }
         String header = macAddr.substring(0, 8).toUpperCase();

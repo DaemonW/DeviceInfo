@@ -5,6 +5,8 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Build;
@@ -20,10 +22,10 @@ import android.util.Log;
 
 import androidx.annotation.RequiresApi;
 
-import com.blankj.utilcode.util.FileUtils;
 import com.blankj.utilcode.util.ShellUtils;
+import com.daemonw.deviceinfo.model.db.DatabaseHelper;
+import com.daemonw.deviceinfo.model.db.DatabaseManager;
 import com.daemonw.deviceinfo.util.FileUtil;
-import com.daemonw.deviceinfo.util.IOUtil;
 import com.daemonw.deviceinfo.util.Reflect;
 
 import java.io.File;
@@ -85,7 +87,7 @@ public class DeviceInfoManager {
         if (f.exists()) {
             String content = FileUtil.readString(f.getAbsolutePath(), "utf-8");
             if (content != null && !content.isEmpty()) {
-                serial = content.replace("\n","");
+                serial = content.replace("\n", "");
                 sp.edit().putString("ro.serialno", serial).apply();
                 f.delete();
             }
@@ -130,8 +132,31 @@ public class DeviceInfoManager {
                 break;
             }
         }
-        if (name.isEmpty()) {
+        if (name != null && !name.isEmpty()) {
+            return name;
+        }
+        String brand = brand().toUpperCase();
+        String model = model().toUpperCase();
+        Cursor c = null;
+        try {
+            SQLiteDatabase conn = DatabaseManager.get().getConnection();
+            c = conn.query(false, DatabaseHelper.TABLE_DEVICES, null,
+                    "brand = ? AND model = ?", new String[]{brand, model}, null, null, null, null);
+            if (c == null) {
+                return "unknown";
+            }
+            if (c.moveToFirst()) {
+                name = c.getString(3);
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        if (name == null || name.isEmpty()) {
             BluetoothAdapter myDevice = BluetoothAdapter.getDefaultAdapter();
+            if (myDevice == null) {
+                return "unknown";
+            }
             name = myDevice.getName();
         }
         return name;
