@@ -657,7 +657,7 @@ public class MainActivity extends AppCompatActivity {
             String brand = record.get(0);
             cv.put("brand", unicodeToUtf8(brand).toUpperCase());
             String marketName = record.get(1);
-            cv.put("market_name", unicodeToUtf8(marketName).toUpperCase());
+            cv.put("market_name", unicodeToUtf8(marketName));
             String device = record.get(2);
             cv.put("device", unicodeToUtf8(device).toUpperCase());
             String model = record.get(3);
