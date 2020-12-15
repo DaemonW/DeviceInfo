@@ -19,8 +19,14 @@ public class SocViewModel extends BaseViewModel<SocInfo> {
         HashMap<String, String> infoMap = new HashMap<>();
         info.cpuInfo = catCpuInfoFile(infoMap);
         info.cpu = infoMap.get("Hardware");
+        if (info.cpu == null || info.cpu.isEmpty()) {
+            info.cpu = dm.cpuName();
+        }
         info.features = infoMap.get("Features");
         info.processor = infoMap.get("Processor");
+        if (info.processor == null || info.processor.isEmpty()) {
+            info.processor = dm.cpuABI();
+        }
         info.core = infoMap.get("CPU architecture");
         SharedPreferences sp = context.getApplicationContext().getSharedPreferences("default", Context.MODE_PRIVATE);
         info.gpu = sp.getString("gpu", "");

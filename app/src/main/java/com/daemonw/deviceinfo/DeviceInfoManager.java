@@ -114,6 +114,14 @@ public class DeviceInfoManager {
         return null;
     }
 
+    public String cpuName(){
+        return getProp("ro.hardware.chipname");
+    }
+
+    public String cpuABI(){
+        return getProp("ro.product.cpu.abi");
+    }
+
     private final String[] MARKET_NAME_KEY = new String[]{
             "ro.semc.product.name",
             "ro.config.marketing_name",//for huawei
