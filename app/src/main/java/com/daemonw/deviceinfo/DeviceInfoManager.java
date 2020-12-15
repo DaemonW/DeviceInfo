@@ -114,15 +114,30 @@ public class DeviceInfoManager {
         return null;
     }
 
-    public String cpuName(){
+    public String cpuName() {
         return getProp("ro.hardware.chipname");
     }
 
-    public String cpuABI(){
+    public String cpuABI() {
         return getProp("ro.product.cpu.abi");
     }
 
-    private final String[] MARKET_NAME_KEY = new String[]{
+    private final String[] MARKET_NAME_KEY_HUAWEI = new String[]{
+            "ro.semc.product.name",
+            "ro.config.marketing_name",//for huawei
+            "ro.product.nickname",
+            "ro.config.devicename",
+            "persist.sys.devicename",
+            "persist.sys.exif.model",};
+
+    private final String[] MARKET_NAME_KEY_SAMSUNG = new String[]{
+            "ro.semc.product.name",
+            "ro.product.nickname",
+            "ro.config.devicename",
+            "persist.sys.devicename",
+            "persist.sys.exif.model",};
+
+    private final String[] MARKET_NAME_KEY_OPPO = new String[]{
             "ro.semc.product.name",
             "ro.config.marketing_name",//for huawei
             "ro.product.nickname",
@@ -132,18 +147,44 @@ public class DeviceInfoManager {
             "ro.product.product.device",//for oneplus
             "ro.oppo.market.name"};//for oppo
 
-    public String marketName() {
+    private String getMarketNameFromProp(String brand) {
+        String marketName = null;
+        switch (brand) {
+            case "HUAWEI":
+            case "HONOR":
+                marketName = getPropFromKeys(MARKET_NAME_KEY_HUAWEI);
+                break;
+            case "SAMSUNG":
+                marketName = getPropFromKeys(MARKET_NAME_KEY_SAMSUNG);
+                break;
+            case "OPPO":
+            case "ONEPLUS":
+                marketName = getPropFromKeys(MARKET_NAME_KEY_OPPO);
+                break;
+            default:
+                marketName = getPropFromKeys(MARKET_NAME_KEY_SAMSUNG);
+                break;
+        }
+        return marketName;
+    }
+
+    private String getPropFromKeys(String[] keys) {
         String name = null;
-        for (String propKey : MARKET_NAME_KEY) {
+        for (String propKey : keys) {
             name = getProp(propKey);
             if (!name.isEmpty()) {
                 break;
             }
         }
+        return name;
+    }
+
+    public String marketName() {
+        String brand = brand().toUpperCase();
+        String name = getMarketNameFromProp(brand);
         if (name != null && !name.isEmpty()) {
             return name;
         }
-        String brand = brand().toUpperCase();
         String model = model().toUpperCase();
         Cursor c = null;
         try {
